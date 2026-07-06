@@ -68,7 +68,7 @@ export default function Home({ onNavigate }: HomeProps) {
 
     const profileChannel = supabase
       .channel('public-profiles-count')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, loadCounts)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, loadCountsAndSettings)
       .subscribe();
 
     const teamChannel = supabase
