@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { Eye, EyeOff, AlertCircle, CheckCircle, Crosshair } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Page } from '../types';
@@ -12,8 +12,7 @@ const START_DATE = '2026-07-08T00:00:00';
 export default function AuthPage({ onNavigate }: AuthPageProps) {
   const [isRegistrationClosed, setIsRegistrationClosed] = useState(false);
 
-  import { useEffect } from 'react';
-  
+  // Use effect to check date
   useEffect(() => {
     const checkDate = () => {
       setIsRegistrationClosed(new Date() >= new Date(START_DATE));
@@ -229,8 +228,9 @@ export default function AuthPage({ onNavigate }: AuthPageProps) {
                         type="email"
                         value={regEmail}
                         onChange={e => setRegEmail(e.target.value)}
-                        placeholder="votre@email.com (optionnel)"
+                        placeholder="votre@email.com"
                         className="input-dark"
+                        required
                       />
                     </div>
 

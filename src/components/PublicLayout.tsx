@@ -154,20 +154,6 @@ export default function PublicLayout({ children, currentPage, onNavigate }: Publ
         </main>
       )}
 
-      {/* Footer */}
-      <footer className="bg-ghost-dark border-t border-ghost-border py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <Logo onNavigate={onNavigate} size="sm" />
-          <p className="text-ghost-gray text-xs font-barlow">
-            &copy; 2026 Ghost Cup. Tous droits réservés.
-          </p>
-          <div className="flex items-center gap-4">
-            {['Twitter', 'Discord', 'Twitch'].map(s => (
-              <span key={s} className="text-ghost-gray hover:text-ghost-gold text-xs font-barlow font-bold uppercase tracking-wider cursor-pointer transition-colors">{s}</span>
-            ))}
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
