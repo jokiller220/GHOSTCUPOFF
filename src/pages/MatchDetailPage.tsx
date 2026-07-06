@@ -139,9 +139,9 @@ export default function MatchDetailPage({ matchId, onNavigate }: MatchDetailPage
       {/* Info + Score grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Match info */}
-        <div className="card p-6">
+        <div className="card p-6 overflow-x-auto">
           <p className="section-title mb-4">INFORMATIONS</p>
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[300px]">
             <tbody>
               {[
                 { label: 'Mode de jeu', value: match.mode ?? '—' },
@@ -159,9 +159,9 @@ export default function MatchDetailPage({ matchId, onNavigate }: MatchDetailPage
         </div>
 
         {/* Score breakdown */}
-        <div className="card p-6">
+        <div className="card p-6 overflow-x-auto">
           <p className="section-title mb-4">SCORE</p>
-          <table className="w-full">
+          <table className="w-full min-w-[300px]">
             <thead>
               <tr className="border-b border-ghost-border">
                 <th className="text-ghost-gray text-[10px] font-barlow uppercase tracking-wider text-left pb-2"></th>

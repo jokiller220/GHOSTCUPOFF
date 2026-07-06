@@ -243,7 +243,7 @@ export default function AdminJoueursPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-ghost-border mb-6">
+      <div className="flex border-b border-ghost-border mb-6 overflow-x-auto whitespace-nowrap hide-scrollbar">
         {[
           { key: 'players', label: `JOUEURS (${players.length})` },
           { key: 'teams', label: `ÉQUIPES (${teams.length})` },

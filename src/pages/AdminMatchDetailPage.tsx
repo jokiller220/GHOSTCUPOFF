@@ -279,7 +279,7 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
         {/* Main panel */}
         <div className="lg:col-span-2">
           {/* Tabs */}
-          <div className="flex border-b border-ghost-border mb-6">
+          <div className="flex border-b border-ghost-border mb-6 overflow-x-auto whitespace-nowrap hide-scrollbar">
             {([
               { key: 'score', label: 'SCORE' },
               { key: 'params', label: 'PARAMÈTRES' },
@@ -298,8 +298,8 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
           </div>
 
           {activeTab === 'score' && (
-            <div className="card p-6">
-              <table className="w-full">
+            <div className="card p-6 overflow-x-auto">
+              <table className="w-full min-w-[300px]">
                 <thead>
                   <tr className="border-b border-ghost-border">
                     <th className="text-ghost-gray text-[10px] font-barlow uppercase tracking-wider text-left pb-2 w-24"></th>

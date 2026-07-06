@@ -319,7 +319,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
       )}
 
       {/* Format tabs */}
-      <div className="flex border-b border-ghost-border mb-6">
+      <div className="flex border-b border-ghost-border mb-6 overflow-x-auto whitespace-nowrap hide-scrollbar">
         {(['4v4', '1v1'] as Format[]).map(f => (
           <button
             key={f}
