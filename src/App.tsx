@@ -111,10 +111,7 @@ function AppContent() {
     }
   }, [profile, currentPage, navigate]);
 
-  // Maintenance mode block for non-admins
-  if (maintenanceMode && profile?.role !== 'admin') {
-    return <MaintenancePage />;
-  }
+
 
   if (loading) {
     return (
@@ -125,6 +122,11 @@ function AppContent() {
         </div>
       </div>
     );
+  }
+
+  // Maintenance mode block for non-admins
+  if (maintenanceMode && profile?.role !== 'admin') {
+    return <MaintenancePage />;
   }
 
   // Login / Register pages (standalone, no layout)
