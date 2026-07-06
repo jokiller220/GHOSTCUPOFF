@@ -67,6 +67,12 @@ function AppContent() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  useEffect(() => {
+    if (profile?.role === 'admin' && PLAYER_PAGES.includes(currentPage)) {
+      navigate('admin');
+    }
+  }, [profile, currentPage, navigate]);
+
   const navigate = useCallback((page: Page, data?: unknown) => {
     let newHash = `#${page}`;
     if (data && typeof data === 'string') {

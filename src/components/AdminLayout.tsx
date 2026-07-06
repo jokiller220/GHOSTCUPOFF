@@ -104,14 +104,7 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
         </nav>
 
         {/* Footer actions */}
-        <div className="p-4 border-t border-ghost-border flex flex-col gap-2">
-          <button
-            onClick={() => handleNavigate('dashboard')}
-            className="sidebar-link w-full text-ghost-gray"
-          >
-            <LayoutDashboard size={16} />
-            Espace Joueur
-          </button>
+        <div className="p-4 border-t border-ghost-border">
           <button
             onClick={handleSignOut}
             className="sidebar-link w-full text-ghost-red hover:text-red-400 hover:bg-red-950/20"

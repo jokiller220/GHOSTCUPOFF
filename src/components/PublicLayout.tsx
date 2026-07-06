@@ -50,7 +50,7 @@ export default function PublicLayout({ children, currentPage, onNavigate }: Publ
           <div className="hidden md:flex items-center gap-2">
             {profile ? (
               <button
-                onClick={() => onNavigate('dashboard')}
+                onClick={() => onNavigate(profile?.role === 'admin' ? 'admin' : 'dashboard')}
                 className="flex items-center gap-2 btn-gold text-xs"
               >
                 <User size={14} />
@@ -101,8 +101,8 @@ export default function PublicLayout({ children, currentPage, onNavigate }: Publ
             </nav>
             <div className="flex gap-2 border-t border-ghost-border pt-4">
               {profile ? (
-                <button onClick={() => { onNavigate('dashboard'); setMobileOpen(false); }} className="btn-gold text-xs w-full justify-center flex items-center gap-2">
-                  <User size={14} /> Dashboard
+                <button onClick={() => { onNavigate(profile?.role === 'admin' ? 'admin' : 'dashboard'); setMobileOpen(false); }} className="btn-gold text-xs w-full justify-center flex items-center gap-2">
+                  <User size={14} /> {profile?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                 </button>
               ) : (
                 <>
