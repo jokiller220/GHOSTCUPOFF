@@ -175,6 +175,42 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
     setLoading(false);
   }
 
+  async function saveSoloLobbies() {
+    if (!soloLobbyRounds) return;
+    setLoading(true);
+    setMessage(null);
+    setError(null);
+
+    // 1. Fetch current FFA config to keep dates
+    const { data: configData } = await supabase.from('schedule_config').select('config').eq('type', 'ffa').single();
+    const currentConfig = configData?.config || { dates: [] };
+    
+    // 2. Update config with lobbies
+    const newConfig = { ...currentConfig, lobbies: soloLobbyRounds };
+    const { error: updateError } = await supabase.from('schedule_config').update({ config: newConfig }).eq('type', 'ffa');
+    
+    if (updateError) {
+      setError('Échec de la sauvegarde des lobbys.');
+      setLoading(false);
+      return;
+    }
+
+    // 3. Notify players
+    const profileIds = soloLobbyRounds.flatMap(r => r.lobbies.flatMap(l => l.players.map(p => p.id)));
+    if (profileIds.length > 0) {
+      const notifications = profileIds.map(id => ({
+        profile_id: id,
+        type: 'system',
+        title: 'Mêlée Générale',
+        message: 'Les lobbys Solo ont été publiés ! Consultez la page Brackets pour voir votre groupe.'
+      }));
+      await supabase.from('notifications').insert(notifications);
+    }
+
+    setMessage('Lobbys solo enregistrés et publiés avec succès !');
+    setLoading(false);
+  }
+
   useEffect(() => { load(); }, [format]);
 
   return (
@@ -225,7 +261,15 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
       {soloLobbyRounds && (
         <div className="mb-6 space-y-4">
           <div className="rounded-3xl border border-ghost-border p-4 bg-ghost-card/80">
-            <p className="font-barlow font-black text-white uppercase text-xs tracking-widest mb-2">Aperçu des lobbys solo</p>
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-barlow font-black text-white uppercase text-xs tracking-widest">Aperçu des lobbys solo</p>
+              <button 
+                onClick={saveSoloLobbies}
+                className="bg-ghost-gold text-black hover:bg-white font-barlow font-bold text-[10px] uppercase tracking-widest px-4 py-2 rounded transition-colors"
+              >
+                ENREGISTRER LES LOBBYS
+              </button>
+            </div>
             <div className="grid gap-3 md:grid-cols-2">
               {soloLobbyRounds.map((round) => (
                 <div key={round.round} className="rounded-2xl border border-ghost-border/50 bg-ghost-dark p-3">

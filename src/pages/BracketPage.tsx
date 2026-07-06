@@ -21,8 +21,9 @@ interface LeaderboardEntry {
 }
 
 export default function BracketPage({ onNavigate }: BracketPageProps) {
-  const [activeTab, setActiveTab] = useState<'classement' | 'bracket'>('classement');
+  const [activeTab, setActiveTab] = useState<'classement' | 'bracket' | 'solo'>('classement');
   const [matches, setMatches] = useState<Match[]>([]);
+  const [soloLobbyRounds, setSoloLobbyRounds] = useState<any[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [champion, setChampion] = useState<string | null>(null);
@@ -61,9 +62,18 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
     setLoading(false);
   }
 
+  async function fetchSoloLobbies() {
+    setLoading(true);
+    const { data } = await supabase.from('schedule_config').select('config').eq('type', 'ffa').single();
+    setSoloLobbyRounds(data?.config?.lobbies || []);
+    setLoading(false);
+  }
+
   useEffect(() => {
     if (activeTab === 'bracket') {
       fetchMatches();
+    } else if (activeTab === 'solo') {
+      fetchSoloLobbies();
     } else {
       fetchLeaderboard();
     }
@@ -140,6 +150,17 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
           Classement (Phase 1)
         </button>
         <button
+          onClick={() => setActiveTab('solo')}
+          className={`px-4 md:px-8 py-3 font-barlow font-black text-xs md:text-sm uppercase tracking-widest border-b-2 transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
+            activeTab === 'solo'
+              ? 'text-ghost-gold border-ghost-gold'
+              : 'text-ghost-gray border-transparent hover:text-white'
+          }`}
+        >
+          <Target size={14} className="hidden sm:block" />
+          Mêlée Générale (FFA)
+        </button>
+        <button
           onClick={() => setActiveTab('bracket')}
           className={`px-4 md:px-8 py-3 font-barlow font-black text-xs md:text-sm uppercase tracking-widest border-b-2 transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'bracket'
@@ -147,7 +168,7 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
               : 'text-ghost-gray border-transparent hover:text-white'
           }`}
         >
-          <Target size={14} className="hidden sm:block" />
+          <Trophy size={14} className="hidden sm:block" />
           Finale 1v1 (Phase 2)
         </button>
       </div>
@@ -232,6 +253,52 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
               ))
             )}
           </div>
+        </div>
+      ) : activeTab === 'solo' ? (
+        <div className="space-y-6">
+          <div className="flex items-start gap-3 mb-6 bg-ghost-gold/5 border border-ghost-gold/20 p-3 md:p-4">
+            <Target size={18} className="text-ghost-gold shrink-0 mt-0.5" />
+            <p className="text-ghost-gray text-xs leading-relaxed">
+              Voici la composition des lobbys pour la phase <strong className="text-white">Mêlée Générale (FFA)</strong>. Cherchez votre pseudo pour connaître votre groupe de jeu !
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center h-48 gap-3 text-ghost-gray">
+              <RefreshCw size={16} className="animate-spin" />
+              <span className="font-barlow uppercase tracking-wider text-sm">Chargement...</span>
+            </div>
+          ) : soloLobbyRounds.length === 0 ? (
+            <div className="card p-8 text-center text-ghost-gray">
+              <p className="font-barlow text-sm uppercase tracking-wider">Les lobbys n'ont pas encore été publiés.</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {soloLobbyRounds.map((round: any) => (
+                <div key={round.round} className="card p-4 md:p-5 border-ghost-border/50">
+                  <p className="font-barlow font-black text-ghost-gold uppercase text-sm md:text-base tracking-[0.2em] mb-4">
+                    Partie {round.round}
+                  </p>
+                  <div className="space-y-3">
+                    {round.lobbies.map((lobby: any) => (
+                      <div key={lobby.name} className="rounded-2xl border border-ghost-border/30 bg-black/30 p-4 hover:border-ghost-border/50 transition-colors">
+                        <p className="font-barlow font-bold text-white text-[11px] uppercase tracking-wider mb-3">
+                          {lobby.name}
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 text-ghost-gray-light text-xs font-barlow">
+                          {lobby.players.map((player: any) => (
+                            <div key={player.id} className="rounded-lg bg-ghost-dark/80 px-3 py-2 truncate border border-ghost-border/20">
+                              {player.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <>
