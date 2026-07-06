@@ -23,6 +23,7 @@ export default function AdminJoueursPage() {
     const { data: playersData } = await supabase
       .from('profiles')
       .select('*')
+      .eq('role', 'player')
       .order('created_at', { ascending: false });
     
     setPlayers((playersData as Profile[]) ?? []);
