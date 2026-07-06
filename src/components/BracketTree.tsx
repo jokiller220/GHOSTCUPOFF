@@ -76,7 +76,7 @@ export default function BracketTree({ matches, onMatchClick }: BracketTreeProps)
   }
 
   return (
-    <div className="overflow-x-auto pb-4">
+    <div className="pb-4">
       <div className="flex gap-8 items-stretch min-w-max py-4 px-2">
         {rounds.map((round, roundIdx) => (
           <div key={round.order} className="flex flex-col">
