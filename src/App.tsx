@@ -85,7 +85,8 @@ function AppContent() {
   }
 
   // Player dashboard layout
-  if (PLAYER_PAGES.includes(currentPage) && profile) {
+  const isDashboardPage = PLAYER_PAGES.includes(currentPage) || ['bracket', 'planning'].includes(currentPage);
+  if (isDashboardPage && profile) {
     return (
       <DashboardLayout currentPage={currentPage} onNavigate={navigate}>
         {currentPage === 'dashboard' && <DashboardPage onNavigate={navigate} />}
@@ -93,6 +94,8 @@ function AppContent() {
         {currentPage === 'mon-equipe' && <MonEquipePage onNavigate={navigate} />}
         {currentPage === 'notifications' && <NotificationsPage />}
         {currentPage === 'parametres' && <ParametresPage onNavigate={navigate} />}
+        {currentPage === 'bracket' && <BracketPage onNavigate={navigate} />}
+        {currentPage === 'planning' && <PlanningPage onNavigate={navigate} />}
         {currentPage === 'match-detail' && (
           <MatchDetailPage matchId={pageData as string} onNavigate={navigate} />
         )}
