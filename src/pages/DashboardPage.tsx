@@ -72,22 +72,35 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
       });
     }
 
-    // Load matches (all public matches for display)
-    const { data: matches } = await supabase
-      .from('matches')
-      .select('*, scores:match_scores(*)')
-      .in('status', ['scheduled', 'live'])
-      .order('scheduled_at', { ascending: true })
-      .limit(1);
-    setNextMatch(matches?.[0] as Match ?? null);
+    // Get user's teams
+    const { data: teamMembers } = await supabase
+      .from('team_members')
+      .select('team_id')
+      .eq('profile_id', profile!.id);
+    const teamIds = teamMembers?.map(tm => tm.team_id) || [];
 
-    const { data: recent } = await supabase
-      .from('matches')
-      .select('*, scores:match_scores(*)')
-      .eq('status', 'completed')
-      .order('scheduled_at', { ascending: false })
-      .limit(3);
-    setRecentMatches((recent as Match[]) ?? []);
+    if (teamIds.length > 0) {
+      const { data: matches } = await supabase
+        .from('matches')
+        .select('*, scores:match_scores(*)')
+        .in('status', ['scheduled', 'live'])
+        .or(`team1_id.in.(${teamIds.join(',')}),team2_id.in.(${teamIds.join(',')})`)
+        .order('scheduled_at', { ascending: true })
+        .limit(1);
+      setNextMatch(matches?.[0] as Match ?? null);
+
+      const { data: recent } = await supabase
+        .from('matches')
+        .select('*, scores:match_scores(*)')
+        .eq('status', 'completed')
+        .or(`team1_id.in.(${teamIds.join(',')}),team2_id.in.(${teamIds.join(',')})`)
+        .order('scheduled_at', { ascending: false })
+        .limit(3);
+      setRecentMatches((recent as Match[]) ?? []);
+    } else {
+      setNextMatch(null);
+      setRecentMatches([]);
+    }
     setLoading(false);
   }
 
