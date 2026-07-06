@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Page } from './types';
 
@@ -42,12 +42,45 @@ const ADMIN_PAGES: Page[] = ['admin', 'admin-matchs', 'admin-joueurs', 'admin-br
 
 function AppContent() {
   const { profile, loading } = useAuth();
-  const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [pageData, setPageData] = useState<unknown>(null);
+  const [currentPage, setCurrentPage] = useState<Page>(() => {
+    const hash = window.location.hash.replace('#', '');
+    return hash ? (hash.split('/')[0] as Page) : 'home';
+  });
+  const [pageData, setPageData] = useState<unknown>(() => {
+    const hash = window.location.hash.replace('#', '');
+    return hash.includes('/') ? hash.split('/')[1] : null;
+  });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        const parts = hash.split('/');
+        setCurrentPage(parts[0] as Page);
+        setPageData(parts[1] || null);
+      } else {
+        setCurrentPage('home');
+        setPageData(null);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const navigate = useCallback((page: Page, data?: unknown) => {
-    setCurrentPage(page);
-    setPageData(data ?? null);
+    let newHash = `#${page}`;
+    if (data && typeof data === 'string') {
+      newHash += `/${data}`;
+    }
+    
+    if (window.location.hash !== newHash) {
+      window.location.hash = newHash;
+    } else {
+      // If we're already on the hash but want to force re-render, we set state manually
+      setCurrentPage(page);
+      setPageData(data ?? null);
+    }
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
