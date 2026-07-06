@@ -77,9 +77,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   }
 
-  async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: 'Email ou mot de passe incorrect.' };
+  async function signIn(emailOrUsername: string, password: string) {
+    let emailToUse = emailOrUsername;
+    
+    // If it doesn't look like an email, assume it's a cod_username
+    if (!emailOrUsername.includes('@')) {
+      const { data, error: rpcError } = await supabase.rpc('get_email_by_username', { p_username: emailOrUsername });
+      if (rpcError || !data) {
+        return { error: 'Utilisateur introuvable.' };
+      }
+      emailToUse = data;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email: emailToUse, password });
+    if (error) return { error: 'Email, pseudo ou mot de passe incorrect.' };
     return { error: null };
   }
 

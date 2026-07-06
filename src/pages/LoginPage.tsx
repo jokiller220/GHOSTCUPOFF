@@ -8,7 +8,7 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ onNavigate }: LoginPageProps) {
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginId, setLoginId] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
     e.preventDefault();
     setLoginError('');
     setLoginLoading(true);
-    const { error } = await signIn(loginEmail, loginPassword);
+    const { error } = await signIn(loginId, loginPassword);
     setLoginLoading(false);
     if (error) { setLoginError(error); return; }
     onNavigate('dashboard');
@@ -48,13 +48,13 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-2">
-                  Email
+                  Email ou Pseudo Call of Duty
                 </label>
                 <input
                   type="text"
-                  value={loginEmail}
-                  onChange={e => setLoginEmail(e.target.value)}
-                  placeholder="Entrez votre email"
+                  value={loginId}
+                  onChange={e => setLoginId(e.target.value)}
+                  placeholder="Entrez votre email ou pseudo"
                   className="input-dark"
                   required
                 />
