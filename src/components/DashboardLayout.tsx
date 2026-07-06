@@ -10,6 +10,9 @@ import {
   Shield,
   Menu,
   X,
+  Home,
+  FileText,
+  Gift,
 } from 'lucide-react';
 import { Page } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -111,6 +114,35 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
               {label}
             </button>
           ))}
+
+          <div className="mx-4 my-2 border-t border-ghost-border" />
+          <button
+            onClick={() => handleNavigate('home')}
+            className={currentPage === 'home' ? 'sidebar-link-active' : 'sidebar-link'}
+          >
+            <span className={currentPage === 'home' ? 'text-ghost-gold' : 'text-ghost-gray'}>
+              <Home size={16} />
+            </span>
+            Site public
+          </button>
+          <button
+            onClick={() => handleNavigate('reglement')}
+            className={currentPage === 'reglement' ? 'sidebar-link-active' : 'sidebar-link'}
+          >
+            <span className={currentPage === 'reglement' ? 'text-ghost-gold' : 'text-ghost-gray'}>
+              <FileText size={16} />
+            </span>
+            Règlement
+          </button>
+          <button
+            onClick={() => handleNavigate('recompenses')}
+            className={currentPage === 'recompenses' ? 'sidebar-link-active' : 'sidebar-link'}
+          >
+            <span className={currentPage === 'recompenses' ? 'text-ghost-gold' : 'text-ghost-gray'}>
+              <Gift size={16} />
+            </span>
+            Récompenses
+          </button>
 
           {profile?.role === 'admin' && (
             <>
