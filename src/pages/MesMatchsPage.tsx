@@ -23,6 +23,7 @@ export default function MesMatchsPage({ onNavigate }: MesMatchsPageProps) {
   const [loading, setLoading] = useState(true);
   const [teamPts, setTeamPts] = useState(0);
   const [soloPts, setSoloPts] = useState(0);
+  const [myFfaLobbies, setMyFfaLobbies] = useState<{ round: number; date: string; time: string; name: string; players: any[] }[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -36,12 +37,32 @@ export default function MesMatchsPage({ onNavigate }: MesMatchsPageProps) {
           .from('tournament_entries')
           .select('team_points, solo_points')
           .eq('profile_id', profile.id)
-          .maybeSingle() : Promise.resolve({ data: null })
+          .maybeSingle() : Promise.resolve({ data: null }),
+        supabase.from('schedule_config').select('config').eq('type', 'ffa').maybeSingle()
       ]);
       setMatches((matchData as Match[]) ?? []);
       if (entryData) {
         setTeamPts(entryData.team_points || 0);
         setSoloPts(entryData.solo_points || 0);
+      }
+      
+      if (configData?.config?.lobbies && profile) {
+        const config = configData.config;
+        const myLobbies = [];
+        for (const roundData of config.lobbies) {
+          const myLobby = roundData.lobbies.find((l: any) => l.players.some((p: any) => p.id === profile.id));
+          if (myLobby) {
+            const dateInfo = config.dates?.[roundData.round - 1] || null;
+            myLobbies.push({
+              round: roundData.round,
+              name: myLobby.name,
+              players: myLobby.players,
+              date: dateInfo?.date,
+              time: dateInfo?.time || dateInfo?.times?.[0]
+            });
+          }
+        }
+        setMyFfaLobbies(myLobbies);
       }
       setLoading(false);
     })();
@@ -169,8 +190,50 @@ export default function MesMatchsPage({ onNavigate }: MesMatchsPageProps) {
           <div className="card p-8 text-center mt-6">
             <Target size={32} className="mx-auto mb-3 text-ghost-gold/50" />
             <p className="font-barlow text-white text-sm uppercase tracking-wider font-bold">Total des points solo : {soloPts}</p>
-            <p className="text-ghost-gray text-xs mt-2">Les détails des parties FFA sont saisis par les administrateurs après chaque round. Vos points globaux s'actualiseront ici.</p>
           </div>
+
+          {myFfaLobbies.length === 0 ? (
+            <div className="card p-12 text-center mt-6">
+              <Clock size={32} className="mx-auto mb-3 text-ghost-gray/30" />
+              <p className="font-barlow text-ghost-gray text-sm uppercase tracking-wider">Les lobbys ne sont pas encore générés.</p>
+              <p className="text-ghost-gray/50 text-xs mt-2">Revenez plus tard pour découvrir vos prochains matchs FFA.</p>
+            </div>
+          ) : (
+            <div className="space-y-4 mt-6">
+              <h3 className="font-barlow font-black text-white text-lg uppercase tracking-wider mb-2">Mes Lobbys (À venir)</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                {myFfaLobbies.map(lobby => (
+                  <div key={lobby.round} className="card p-5 hover:border-ghost-gold/30 transition-colors">
+                    <div className="flex items-center justify-between border-b border-ghost-border/30 pb-3 mb-3">
+                      <div>
+                        <span className="font-barlow font-black text-ghost-gold text-sm uppercase tracking-widest">{lobby.name}</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-ghost-gray text-[10px] font-barlow uppercase">Partie {lobby.round}</span>
+                          <span className="text-ghost-border">·</span>
+                          <span className="text-ghost-gray text-[10px] font-barlow flex items-center gap-1">
+                            <Clock size={10} /> 
+                            {lobby.date ? formatDate(`${lobby.date}T${lobby.time || '18:00:00'}`) : 'TBD'}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="status-badge text-ghost-gray border border-ghost-border px-2 py-0.5">À VENIR</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-ghost-gray-light text-xs font-barlow">
+                      {lobby.players.map(player => (
+                        <div 
+                          key={player.id} 
+                          className={`rounded-lg px-3 py-2 truncate border ${player.id === profile?.id ? 'bg-ghost-gold/10 border-ghost-gold/40 text-white font-bold' : 'bg-ghost-dark/80 border-ghost-border/20'}`}
+                        >
+                          {player.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
