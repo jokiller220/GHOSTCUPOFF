@@ -173,25 +173,24 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
 
         {/* === BOTTOM NAV (mobile only) === */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-ghost-dark border-t border-ghost-border flex justify-around py-1 px-2">
-          {playerLinks.slice(0, 5).map(({ label, page, icon }) => (
-            <button
-              key={page}
-              onClick={() => handleNavigate(page)}
-              className={`flex flex-col items-center gap-0.5 py-2 px-2 min-w-[50px] transition-colors ${
-                currentPage === page ? 'text-ghost-gold' : 'text-ghost-gray'
-              }`}
-            >
-              {icon}
-              <span className="text-[9px] font-barlow font-bold uppercase tracking-wide leading-none">{label.split(' ')[0]}</span>
-            </button>
-          ))}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="flex flex-col items-center gap-0.5 py-2 px-2 min-w-[50px] text-ghost-gray"
-          >
-            <Menu size={16} />
-            <span className="text-[9px] font-barlow font-bold uppercase tracking-wide leading-none">Menu</span>
-          </button>
+          {playerLinks.slice(0, 4).map(({ label, page, icon }) => {
+            // Clean up labels for mobile (e.g. "Mes Matchs" -> "Matchs")
+            const mobileLabel = label.replace('Mes ', '').replace('Mon ', '');
+            return (
+              <button
+                key={page}
+                onClick={() => handleNavigate(page)}
+                className={`flex flex-col items-center gap-1 py-2 px-3 min-w-[60px] transition-colors ${
+                  currentPage === page ? 'text-ghost-gold' : 'text-ghost-gray'
+                }`}
+              >
+                {icon}
+                <span className="text-[10px] font-barlow font-bold uppercase tracking-wide leading-none">
+                  {mobileLabel}
+                </span>
+              </button>
+            );
+          })}
         </nav>
       </div>
 
