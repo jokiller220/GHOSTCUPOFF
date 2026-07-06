@@ -343,12 +343,12 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
           <p className="font-barlow text-ghost-gray text-sm uppercase tracking-wider mb-4">Aucun bracket généré</p>
         </div>
       ) : (
-        <div className="card p-6 overflow-hidden">
+        <div className="card p-6 w-full max-w-full overflow-hidden">
           <div className="text-right mb-2 flex items-center justify-end gap-2 text-ghost-gold/70 text-[10px] uppercase tracking-widest font-barlow">
-            <span>Faites défiler</span>
+            <span>Faites défiler horizontalement</span>
             <span className="animate-pulse">👉</span>
           </div>
-          <div className="overflow-x-auto custom-scrollbar pb-4">
+          <div className="overflow-x-auto custom-scrollbar pb-4 w-full">
             <BracketTree
               matches={matches}
               onMatchClick={m => onNavigate('admin-match-detail', m.id)}
