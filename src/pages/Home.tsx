@@ -241,9 +241,9 @@ export default function Home({ onNavigate }: HomeProps) {
               {isRegistrationClosed ? (
                 <p className="font-barlow font-black text-ghost-gold">Les inscriptions sont officiellement clôturées.</p>
               ) : (
-                playerCount < MAX_PLAYERS ? (
+                playerCount < maxPlayers ? (
                   <p>
-                    <span className="font-barlow font-black text-white">{playerCount}</span> participant{playerCount > 1 ? 's' : ''} inscrit{playerCount > 1 ? 's' : ''} — <span className="font-barlow font-black text-ghost-gold">{availableSlots}</span> place{availableSlots > 1 ? 's' : ''} restantes sur {MAX_PLAYERS}.
+                    <span className="font-barlow font-black text-white">{playerCount}</span> participant{playerCount > 1 ? 's' : ''} inscrit{playerCount > 1 ? 's' : ''} — <span className="font-barlow font-black text-ghost-gold">{availableSlots}</span> place{availableSlots > 1 ? 's' : ''} restantes sur {maxPlayers}.
                   </p>
                 ) : (
                   <p className="font-barlow font-black text-ghost-gold">Le tournoi est complet : 24 participants inscrits.</p>
