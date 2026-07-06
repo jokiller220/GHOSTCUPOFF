@@ -3,6 +3,7 @@ import { Trophy, Target, Users, Zap, ChevronRight, Twitter, Youtube } from 'luci
 import { supabase } from '../lib/supabase';
 import { getChampionFromMatches } from '../lib/tournament';
 import { Match, Page, PublicAnnouncement } from '../types';
+import { useAuth } from '../context/AuthContext';
 import ChampionReveal from '../components/ChampionReveal';
 import Countdown from '../components/Countdown';
 
@@ -15,6 +16,7 @@ const START_DATE = '2026-07-08T00:00:00';
 const FINAL_DATE = '2026-07-15T20:00:00';
 
 export default function Home({ onNavigate }: HomeProps) {
+  const { profile } = useAuth();
   const [announcements, setAnnouncements] = useState<PublicAnnouncement[]>([]);
   const [playerCount, setPlayerCount] = useState(0);
   const [teamCount, setTeamCount] = useState(0);
@@ -186,7 +188,15 @@ export default function Home({ onNavigate }: HomeProps) {
 
             {/* CTA buttons */}
             <div className="flex flex-wrap gap-4">
-              {isRegistrationClosed ? (
+              {profile ? (
+                <button
+                  onClick={() => onNavigate('dashboard')}
+                  className="btn-gold text-sm flex items-center gap-2 py-3 px-8"
+                >
+                  MON ESPACE JOUEUR
+                  <ChevronRight size={16} />
+                </button>
+              ) : isRegistrationClosed ? (
                 <button
                   disabled
                   className="btn-outline opacity-50 cursor-not-allowed text-sm flex items-center gap-2 py-3 px-8"
@@ -250,7 +260,7 @@ export default function Home({ onNavigate }: HomeProps) {
             <div className="flex gap-3 md:gap-4">
             <div
               className="flex-1 bg-ghost-dark/80 border border-ghost-gold/30 px-3 md:px-6 py-3 md:py-4 cursor-pointer hover:border-ghost-gold transition-all duration-300 group backdrop-blur"
-              onClick={() => onNavigate('register')}
+              onClick={() => onNavigate(profile ? 'dashboard' : 'register')}
             >
               <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
                 <Users size={16} className="text-ghost-gold md:w-5 md:h-5" />
@@ -260,7 +270,7 @@ export default function Home({ onNavigate }: HomeProps) {
             </div>
             <div
               className="flex-1 bg-ghost-dark/80 border border-ghost-gold/30 px-3 md:px-6 py-3 md:py-4 cursor-pointer hover:border-ghost-gold transition-all duration-300 group backdrop-blur"
-              onClick={() => onNavigate('register')}
+              onClick={() => onNavigate(profile ? 'dashboard' : 'register')}
             >
               <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
                 <Target size={16} className="text-ghost-gold md:w-5 md:h-5" />
@@ -356,7 +366,11 @@ export default function Home({ onNavigate }: HomeProps) {
             Inscris-toi maintenant avant la clôture des inscriptions. Les brackets sont générés automatiquement au démarrage du tournoi.
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
-            {isRegistrationClosed ? (
+            {profile ? (
+              <button onClick={() => onNavigate('dashboard')} className="btn-gold text-sm py-3 px-10 flex items-center gap-2">
+                MON ESPACE <ChevronRight size={16} />
+              </button>
+            ) : isRegistrationClosed ? (
               <button disabled className="btn-outline opacity-50 cursor-not-allowed text-sm py-3 px-10 flex items-center gap-2">
                 INSCRIPTIONS CLÔTURÉES
               </button>
