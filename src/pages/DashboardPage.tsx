@@ -31,7 +31,9 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
     teamPoints: 0,
     soloPoints: 0,
     totalPoints: 0,
-    rank: '-'
+    totalPoints: 0,
+    rank: '-',
+    status: 'registered'
   });
   const [loading, setLoading] = useState(true);
 
@@ -66,7 +68,9 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
         teamPoints: entry.team_points || 0,
         soloPoints: entry.solo_points || 0,
         totalPoints: entry.total_points || 0,
-        rank: entry.seed ? `#${entry.seed}` : '-'
+        totalPoints: entry.total_points || 0,
+        rank: entry.seed ? `#${entry.seed}` : '-',
+        status: entry.status || 'registered'
       });
     }
 
@@ -90,7 +94,17 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
   }
 
   function getStatus() {
-    return { label: 'EN COMPÉTITION', color: 'text-ghost-green bg-ghost-green/10 border border-ghost-green/40' };
+    switch (stats.status) {
+      case 'active':
+        return { label: 'EN COMPÉTITION', color: 'text-ghost-green bg-ghost-green/10 border border-ghost-green/40', live: true };
+      case 'qualified':
+        return { label: 'QUALIFIÉ (PHASE FINALE)', color: 'text-ghost-gold bg-ghost-gold/10 border border-ghost-gold/40', live: false };
+      case 'eliminated':
+        return { label: 'ÉLIMINÉ', color: 'text-ghost-red bg-ghost-red/10 border border-ghost-red/40', live: false };
+      case 'registered':
+      default:
+        return { label: 'INSCRIT (EN ATTENTE)', color: 'text-ghost-gray bg-ghost-dark border border-ghost-border', live: false };
+    }
   }
 
   function formatScheduled(dateStr?: string | null) {
@@ -117,7 +131,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
             BIENVENUE, <span className="text-ghost-gold">{profile?.cod_username?.toUpperCase()}</span>
           </h1>
           <div className={`inline-flex items-center gap-2 mt-3 px-3 py-1 text-xs font-barlow font-bold uppercase tracking-wider ${getStatus().color}`}>
-            <span className="w-1.5 h-1.5 rounded-full bg-ghost-green live-indicator" />
+            {getStatus().live && <span className="w-1.5 h-1.5 rounded-full bg-ghost-green live-indicator" />}
             {getStatus().label}
           </div>
         </div>
