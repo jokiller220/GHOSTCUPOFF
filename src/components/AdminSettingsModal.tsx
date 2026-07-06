@@ -83,8 +83,30 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
     setError('');
     
     try {
-      const { error } = await supabase.rpc('reset_tournament');
-      if (error) throw error;
+      // 1. Delete dependent tables first
+      await supabase.from('score_proofs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('match_scores').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      // 2. Delete matches and entries
+      await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('tournament_entries').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      // 3. Delete teams and their members
+      await supabase.from('team_members').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('teams').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      // 4. Reset schedule config
+      await supabase.from('schedule_config').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+      // Log action
+      const { data: user } = await supabase.auth.getUser();
+      if (user.user) {
+        await supabase.from('activity_logs').insert({
+          admin_id: user.user.id,
+          action: 'RÉINITIALISATION',
+          details: { message: "Toutes les données du tournoi (équipes, matchs, brackets, scores) ont été effacées pour une nouvelle saison." }
+        });
+      }
       
       setSuccess('Tournoi réinitialisé avec succès !');
       setShowResetConfirm(false);
