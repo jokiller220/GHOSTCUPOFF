@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RefreshCw, ChevronRight, Clock } from 'lucide-react';
+import { RefreshCw, ChevronRight, Clock, Target } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Match, Page } from '../types';
 
