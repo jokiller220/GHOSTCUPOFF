@@ -21,6 +21,11 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Reset states
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [resetting, setResetting] = useState(false);
+
   useEffect(() => {
     async function loadSettings() {
       const { data, error } = await supabase.from('tournament_settings').select('*').single();
@@ -70,6 +75,26 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
       setSaving(false);
     }
   }
+
+  const handleReset = async () => {
+    if (resetConfirmText !== 'CONFIRMER') return;
+    
+    setResetting(true);
+    setError('');
+    
+    try {
+      const { error } = await supabase.rpc('reset_tournament');
+      if (error) throw error;
+      
+      setSuccess('Tournoi réinitialisé avec succès !');
+      setShowResetConfirm(false);
+      setResetConfirmText('');
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la réinitialisation');
+    } finally {
+      setResetting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -168,6 +193,57 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
             </div>
           </form>
         )}
+        
+        {/* Danger Zone */}
+        {!loading && (
+          <div className="mt-8 pt-6 border-t border-red-900/30">
+            <h3 className="font-barlow font-bold text-red-500 text-sm uppercase tracking-wider mb-2">Zone de Danger</h3>
+            <p className="text-xs text-ghost-gray mb-4">
+              La réinitialisation effacera de manière irréversible toutes les équipes, les matchs, et les scores de la saison. Seuls les comptes utilisateurs seront conservés.
+            </p>
+            
+            {!showResetConfirm ? (
+              <button 
+                onClick={() => setShowResetConfirm(true)}
+                className="w-full bg-red-900/20 text-red-500 border border-red-900 hover:bg-red-900/40 py-3 rounded text-xs font-bold transition-colors"
+              >
+                RÉINITIALISER LE TOURNOI
+              </button>
+            ) : (
+              <div className="bg-red-950/30 border border-red-900 rounded p-4">
+                <p className="text-xs font-bold text-red-400 mb-2">Êtes-vous absolument sûr ?</p>
+                <p className="text-xs text-red-300/70 mb-4">Tapez "CONFIRMER" ci-dessous pour valider la suppression définitive.</p>
+                <input
+                  type="text"
+                  value={resetConfirmText}
+                  onChange={(e) => setResetConfirmText(e.target.value)}
+                  placeholder="Tapez CONFIRMER"
+                  className="input-ghost w-full mb-3 border-red-900/50 focus:border-red-500"
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => {
+                      setShowResetConfirm(false);
+                      setResetConfirmText('');
+                    }}
+                    className="flex-1 btn-outline py-2 text-xs"
+                    disabled={resetting}
+                  >
+                    ANNULER
+                  </button>
+                  <button 
+                    onClick={handleReset}
+                    disabled={resetConfirmText !== 'CONFIRMER' || resetting}
+                    className="flex-1 bg-red-600 hover:bg-red-500 text-white disabled:opacity-50 font-bold py-2 rounded text-xs transition-colors"
+                  >
+                    {resetting ? 'SUPPRESSION...' : 'CONFIRMER'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );
