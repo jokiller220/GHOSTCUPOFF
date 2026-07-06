@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RefreshCw, GitBranch } from 'lucide-react';
+import { RefreshCw, GitBranch, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateBracketMatches, generateRoundRobinSchedule, generateSoloLobbyRounds, SoloLobbyRound } from '../lib/tournament';
 import { Match, Format, Page } from '../types';
@@ -16,6 +16,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [soloLobbyRounds, setSoloLobbyRounds] = useState<SoloLobbyRound[] | null>(null);
+  const [lobbiesSaved, setLobbiesSaved] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -26,6 +27,16 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
       .order('round_order')
       .order('match_order');
     setMatches((data as Match[]) ?? []);
+
+    const { data: configData } = await supabase.from('schedule_config').select('config').eq('type', 'ffa').single();
+    if (configData?.config?.lobbies) {
+      setSoloLobbyRounds(configData.config.lobbies);
+      setLobbiesSaved(true);
+    } else {
+      setSoloLobbyRounds(null);
+      setLobbiesSaved(false);
+    }
+    
     setLoading(false);
   }
 
@@ -148,6 +159,9 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
   }
 
   async function previewSoloLobbies() {
+    if (lobbiesSaved && !window.confirm('Attention : Les lobbys sont déjà enregistrés. Voulez-vous vraiment écraser la disposition actuelle ? (Vous devrez ré-enregistrer).')) {
+      return;
+    }
     setLoading(true);
     setMessage(null);
     setError(null);
@@ -171,7 +185,8 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
     }));
     
     setSoloLobbyRounds(rounds);
-    setMessage('Prévisualisation des lobbys solo générée avec l\'algorithme anti-collusion.');
+    setMessage('Prévisualisation générée. N\'oubliez pas d\'enregistrer !');
+    setLobbiesSaved(false);
     setLoading(false);
   }
 
@@ -211,6 +226,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
     }
 
     setMessage('Lobbys solo enregistrés et publiés avec succès !');
+    setLobbiesSaved(true);
     setLoading(false);
   }
 
@@ -256,8 +272,8 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
             Générer bracket 1v1
           </button>
         )}
-        <button onClick={previewSoloLobbies} className="btn-outline text-xs py-2 px-4 uppercase tracking-widest">
-          Prévisualiser lobbys solo
+        <button onClick={previewSoloLobbies} className={`btn-outline text-xs py-2 px-4 uppercase tracking-widest ${lobbiesSaved ? 'border-ghost-red/50 text-ghost-red hover:bg-ghost-red/10' : ''}`}>
+          {lobbiesSaved ? 'Regénérer lobbys solo' : 'Prévisualiser lobbys solo'}
         </button>
       </div>
 
@@ -266,12 +282,18 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
           <div className="rounded-3xl border border-ghost-border p-4 bg-ghost-card/80">
             <div className="flex items-center justify-between mb-4">
               <p className="font-barlow font-black text-white uppercase text-xs tracking-widest">Aperçu des lobbys solo</p>
-              <button 
-                onClick={saveSoloLobbies}
-                className="bg-ghost-gold text-black hover:bg-white font-barlow font-bold text-[10px] uppercase tracking-widest px-4 py-2 rounded transition-colors"
-              >
-                ENREGISTRER LES LOBBYS
-              </button>
+              {lobbiesSaved ? (
+                <span className="text-ghost-green font-barlow font-bold text-xs flex items-center gap-1">
+                  <CheckCircle size={14} /> ENREGISTRÉ
+                </span>
+              ) : (
+                <button 
+                  onClick={saveSoloLobbies}
+                  className="bg-ghost-gold text-black hover:bg-white font-barlow font-bold text-[10px] uppercase tracking-widest px-4 py-2 rounded transition-colors"
+                >
+                  ENREGISTRER LES LOBBYS
+                </button>
+              )}
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {soloLobbyRounds.map((round) => (
