@@ -9,6 +9,8 @@ export default function AdminJoueursPage() {
   const [tab, setTab] = useState<'players' | 'teams'>('players');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => { load(); }, [tab]);
 
@@ -62,8 +64,10 @@ export default function AdminJoueursPage() {
   const [saving, setSaving] = useState(false);
 
   async function autoDistributePlayers() {
-    if (!confirm('Clôturer les inscriptions et répartir automatiquement les joueurs sans équipe ?')) return;
+    if (!window.confirm('Clôturer les inscriptions et répartir automatiquement les joueurs sans équipe ?')) return;
     setSaving(true);
+    setError('');
+    setSuccess('');
     
     const { data: allPlayers } = await supabase.from('profiles').select('id, cod_username').eq('role', 'player');
     const { data: allTeams } = await supabase.from('teams').select('id, name, status, format, members:team_members(profile_id, status)').eq('format', '4v4');
@@ -109,6 +113,13 @@ export default function AdminJoueursPage() {
 
     await load();
     setSaving(false);
+    
+    if (isolatedPlayers.length === 0) {
+      setSuccess("Aucun joueur orphelin à répartir !");
+    } else {
+      setSuccess(`${isolatedPlayers.length} joueurs ont été répartis !`);
+    }
+    setTimeout(() => setSuccess(''), 4000);
   }
 
   return (
@@ -127,6 +138,12 @@ export default function AdminJoueursPage() {
           Clôturer & Répartir
         </button>
       </div>
+
+      {success && (
+        <div className="mb-6 bg-ghost-green/10 border border-ghost-green/30 text-ghost-green px-4 py-3 rounded text-xs font-barlow">
+          {success}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex border-b border-ghost-border mb-6">

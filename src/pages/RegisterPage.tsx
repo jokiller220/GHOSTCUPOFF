@@ -37,8 +37,20 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-ghost-black flex flex-col">
-      <div className="bg-ghost-dark border-b border-ghost-border h-14 flex items-center px-6">
+    <div className="min-h-screen bg-ghost-black flex flex-col relative overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 opacity-40"
+        style={{
+          backgroundImage: `url("/bacgroungimg.jpg")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.8) contrast(120%)',
+        }}
+      />
+      
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <div className="bg-ghost-dark/80 backdrop-blur border-b border-ghost-border h-14 flex items-center px-6">
         <button onClick={() => onNavigate('home')} className="flex items-center gap-2 group">
           <Crosshair size={20} className="text-ghost-gold" strokeWidth={1.5} />
           <span className="font-barlow font-black text-white text-base uppercase tracking-widest">
@@ -107,6 +119,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
             </form>
 
             <p className="text-ghost-gray text-xs text-center mt-6">Déjà un compte ?{' '}<span onClick={() => onNavigate('login')} className="text-ghost-gold font-barlow font-bold cursor-pointer hover:underline">Se connecter</span></p>
+          </div>
           </div>
         </div>
       </div>

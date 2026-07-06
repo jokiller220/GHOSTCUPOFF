@@ -120,14 +120,14 @@ export default function Home({ onNavigate }: HomeProps) {
           background: 'linear-gradient(135deg, #0a0a0a 0%, #111111 40%, #0f0c08 100%)',
         }}
       >
-        {/* Background texture overlay */}
+        {/* Background image overlay */}
         <div
-          className="absolute inset-0 opacity-5"
+          className="absolute inset-0 opacity-40"
           style={{
-            backgroundImage: `url("https://images.pexels.com/photos/3944091/pexels-photo-3944091.jpeg?auto=compress&cs=tinysrgb&w=1920")`,
+            backgroundImage: `url("/bacgroungimg.jpg")`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            filter: 'grayscale(100%) contrast(150%)',
+            filter: 'brightness(0.8) contrast(120%)',
           }}
         />
         {/* Gold vignette */}
@@ -138,17 +138,6 @@ export default function Home({ onNavigate }: HomeProps) {
             background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,162,39,0.3) 0%, transparent 70%)',
           }}
         />
-
-        {/* Soldier image */}
-        <div className="absolute right-0 bottom-0 h-full w-1/2 hidden lg:block overflow-hidden">
-          <img
-            src="/bacgroungimg.jpg"
-            alt="Ghost Cup soldier"
-            className="h-full w-full object-cover object-center opacity-100"
-            style={{ filter: 'contrast(125%) brightness(1.1)' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-ghost-black/30 via-transparent to-transparent" />
-        </div>
 
         {/* Hero content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20 w-full">
