@@ -31,7 +31,6 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
     teamPoints: 0,
     soloPoints: 0,
     totalPoints: 0,
-    totalPoints: 0,
     rank: '-',
     status: 'registered'
   });
@@ -67,7 +66,6 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
       setStats({
         teamPoints: entry.team_points || 0,
         soloPoints: entry.solo_points || 0,
-        totalPoints: entry.total_points || 0,
         totalPoints: entry.total_points || 0,
         rank: entry.seed ? `#${entry.seed}` : '-',
         status: entry.status || 'registered'
