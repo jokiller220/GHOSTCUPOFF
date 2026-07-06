@@ -206,7 +206,7 @@ export default function MatchDetailPage({ matchId, onNavigate }: MatchDetailPage
 
       {/* Actions */}
       <div className="flex gap-3 flex-wrap">
-        {(match.status === 'completed' || match.status === 'live') && (
+        {['scheduled', 'live', 'completed'].includes(match.status) && (
           <button
             onClick={() => onNavigate('preuve-score', match.id)}
             className="btn-gold text-xs py-2.5 flex items-center gap-2"

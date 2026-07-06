@@ -139,7 +139,7 @@ export default function MesMatchsPage({ onNavigate }: MesMatchsPageProps) {
                       </div>
                     </div>
                     <span className={`status-badge border px-2 py-0.5 ${statusInfo.class}`}>{statusInfo.label}</span>
-                    {match.status === 'completed' && (
+                    {['scheduled', 'live', 'completed'].includes(match.status) && (
                       <button
                         onClick={e => { e.stopPropagation(); onNavigate('preuve-score', match.id); }}
                         className="btn-outline text-[10px] py-1.5 px-3 flex items-center gap-1.5"
