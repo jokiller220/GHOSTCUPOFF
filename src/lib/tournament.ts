@@ -37,7 +37,9 @@ function pairKey(a: string, b: string) {
 }
 
 function formatScheduledAt(date: string, time: string) {
-  return `${date}T${time}`;
+  const timeStr = time.length === 5 ? `${time}:00` : time;
+  // Les heures configurées sont en Heure de France (CEST = UTC+02:00 en Juillet)
+  return `${date}T${timeStr}+02:00`;
 }
 
 const MODES_4V4 = ["Point Stratégique", "Recherche et Destruction", "Contrôle"];
