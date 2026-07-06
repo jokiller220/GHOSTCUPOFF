@@ -104,7 +104,7 @@ export function generateRoundRobinSchedule(teams: TeamEntry[], dates: { date: st
   return matches;
 }
 
-export function generateSoloLobbyRounds(players: SoloLobbyPlayer[], lobbySize = 6, rounds = 4): SoloLobbyRound[] {
+export function generateSoloLobbyRounds(players: SoloLobbyPlayer[], lobbySize = 8, rounds = 4): SoloLobbyRound[] {
   // if (players.length !== 24) throw new Error('La génération des lobbys solo attend exactement 24 joueurs.');
   const pairCounts = new Map<string, number>();
   const roundsOutput: SoloLobbyRound[] = [];

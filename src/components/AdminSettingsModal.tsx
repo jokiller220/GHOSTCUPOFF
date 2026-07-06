@@ -118,6 +118,33 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
     }
   };
 
+  const handleSyncSchedule = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const { error: ffaError } = await supabase.from('schedule_config').update({
+        config: { dates: [{ date: "2026-07-08", time: "21:00" }, { date: "2026-07-08", time: "21:30" }, { date: "2026-07-08", time: "22:00" }, { date: "2026-07-08", time: "22:30" }] }
+      }).eq('type', 'ffa');
+      
+      const { error: rrError } = await supabase.from('schedule_config').update({
+        config: { dates: [{ date: "2026-07-09", time: "21:00" }, { date: "2026-07-09", time: "21:45" }, { date: "2026-07-09", time: "22:30" }, { date: "2026-07-10", time: "21:00" }, { date: "2026-07-10", time: "21:45" }] }
+      }).eq('type', 'round_robin');
+      
+      const { error: bracketError } = await supabase.from('schedule_config').update({
+        config: { dates: [{ date: "2026-07-12", times: ["18:00", "19:30", "21:00", "22:30"] }, { date: "2026-07-13", times: ["18:00", "19:30", "21:00", "22:30"] }, { date: "2026-07-14", times: ["18:00", "19:30"] }, { date: "2026-07-15", times: ["20:00"] }] }
+      }).eq('type', 'bracket');
+
+      if (ffaError || rrError || bracketError) throw new Error('Erreur lors de la mise à jour des dates');
+      
+      setSuccess('Calendrier officiel synchronisé avec succès !');
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de la synchronisation');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 animate-fade-in">
       <div className="card w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
@@ -214,6 +241,24 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
               </button>
             </div>
           </form>
+        )}
+        
+
+
+        {/* Sync Schedule */}
+        {!loading && (
+          <div className="mt-8 pt-6 border-t border-ghost-border">
+            <h3 className="font-barlow font-bold text-ghost-gold text-sm uppercase tracking-wider mb-2">Synchronisation</h3>
+            <p className="text-xs text-ghost-gray mb-4">
+              Ajuste automatiquement les dates internes du système (Solo, Équipes, Brackets) pour correspondre au calendrier officiel du 08 au 15 Juillet.
+            </p>
+            <button 
+              onClick={handleSyncSchedule}
+              className="w-full bg-ghost-gold/10 text-ghost-gold border border-ghost-gold/30 hover:bg-ghost-gold hover:text-black py-3 rounded text-xs font-bold transition-colors uppercase"
+            >
+              SYNCHRONISER LE CALENDRIER OFFICIEL
+            </button>
+          </div>
         )}
         
         {/* Danger Zone */}
