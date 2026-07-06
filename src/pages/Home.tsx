@@ -11,16 +11,19 @@ interface HomeProps {
   onNavigate: (page: Page) => void;
 }
 
-const MAX_PLAYERS = 28;
-const START_DATE = '2026-07-08T00:00:00';
-const FINAL_DATE = '2026-07-15T20:00:00';
+
 
 export default function Home({ onNavigate }: HomeProps) {
   const { profile } = useAuth();
   const [announcements, setAnnouncements] = useState<PublicAnnouncement[]>([]);
   const [playerCount, setPlayerCount] = useState(0);
   const [teamCount, setTeamCount] = useState(0);
-  const [availableSlots, setAvailableSlots] = useState(MAX_PLAYERS);
+  
+  // Settings
+  const [startDate, setStartDate] = useState('2026-07-08T00:00:00Z');
+  const [finalDate, setFinalDate] = useState('2026-07-15T20:00:00Z');
+  const [maxPlayers, setMaxPlayers] = useState(28);
+  const [availableSlots, setAvailableSlots] = useState(28);
   const [champion, setChampion] = useState<string | null>(null);
   const [showChampion, setShowChampion] = useState(false);
   const [isRegistrationClosed, setIsRegistrationClosed] = useState(false);
@@ -29,7 +32,7 @@ export default function Home({ onNavigate }: HomeProps) {
 
   useEffect(() => {
     const checkDate = () => {
-      setIsRegistrationClosed(new Date() >= new Date(START_DATE));
+      setIsRegistrationClosed(new Date() >= new Date(startDate));
     };
     checkDate();
     const interval = setInterval(checkDate, 1000);
@@ -37,18 +40,31 @@ export default function Home({ onNavigate }: HomeProps) {
   }, []);
 
   useEffect(() => {
-    async function loadCounts() {
-      const [{ count: playerCount }, { count: teamCount }] = await Promise.all([
+    async function loadCountsAndSettings() {
+      const [
+        { data: settings },
+        { count: playerCount }, 
+        { count: teamCount }
+      ] = await Promise.all([
+        supabase.from('tournament_settings').select('*').single(),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player'),
         supabase.from('teams').select('*', { count: 'exact', head: true }),
       ]);
+      
+      const maxP = settings?.max_players ?? 28;
+      if (settings) {
+        setStartDate(settings.start_date);
+        setFinalDate(settings.final_date);
+        setMaxPlayers(maxP);
+      }
+      
       const players = playerCount ?? 0;
       setPlayerCount(players);
       setTeamCount(teamCount ?? 0);
-      setAvailableSlots(Math.max(0, MAX_PLAYERS - players));
+      setAvailableSlots(Math.max(0, maxP - players));
     }
 
-    loadCounts();
+    loadCountsAndSettings();
 
     const profileChannel = supabase
       .channel('public-profiles-count')
@@ -57,7 +73,12 @@ export default function Home({ onNavigate }: HomeProps) {
 
     const teamChannel = supabase
       .channel('public-teams-count')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'teams' }, loadCounts)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'teams' }, loadCountsAndSettings)
+      .subscribe();
+
+    const settingsChannel = supabase
+      .channel('public-settings-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tournament_settings' }, loadCountsAndSettings)
       .subscribe();
 
     return () => {
@@ -165,14 +186,14 @@ export default function Home({ onNavigate }: HomeProps) {
             <div className="mb-8">
               <p className="font-barlow text-ghost-gray text-xs uppercase tracking-widest mb-1">Finale</p>
               <p className="font-barlow font-black text-white text-2xl md:text-3xl uppercase tracking-wider">
-                15 JUILLET 2026
+                {new Date(finalDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()}
               </p>
             </div>
 
             {/* Countdown */}
             <div className="mb-10">
               <p className="font-barlow text-ghost-gray text-xs uppercase tracking-widest mb-4">Compte à rebours</p>
-              <Countdown targetDate={START_DATE} />
+              <Countdown targetDate={new Date(startDate)} />
             </div>
 
             {/* CTA buttons */}

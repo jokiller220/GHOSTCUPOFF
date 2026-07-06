@@ -31,10 +31,14 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
     if (regPassword.length < 6) { setRegError('Le mot de passe doit contenir au moins 6 caractères.'); return; }
     setRegLoading(true);
     
+    // Fetch dynamic max_players limit
+    const { data: settings } = await supabase.from('tournament_settings').select('max_players').single();
+    const limit = settings?.max_players ?? 28;
+
     // Check limit
     const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player');
-    if (count !== null && count >= 28) {
-      setRegError('Le tournoi est complet (28/28 joueurs). Inscription impossible.');
+    if (count !== null && count >= limit) {
+      setRegError(`Le tournoi est complet (${limit}/${limit} joueurs). Inscription impossible.`);
       setRegLoading(false);
       return;
     }

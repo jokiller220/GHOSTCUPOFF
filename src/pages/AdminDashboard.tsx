@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Users, Users2, Swords, Clock, ChevronRight, RefreshCw, CheckCircle, AlertCircle, UserPlus, Calendar } from 'lucide-react';
+import { Users, Users2, Swords, Clock, ChevronRight, RefreshCw, CheckCircle, AlertCircle, UserPlus, Calendar, Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Match, ActivityLog, Page, ScoreProof } from '../types';
+import { AdminSettingsModal } from '../components/AdminSettingsModal';
 
 interface AdminDashboardProps {
   onNavigate: (page: Page, data?: unknown) => void;
@@ -43,6 +44,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [pendingProofs, setPendingProofs] = useState<ScoreProof[]>([]);
   const [_activeBracketMatches, setActiveBracketMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     load();
@@ -122,9 +124,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <p className="section-title">GHOST CUP ADMIN</p>
           <h1 className="font-barlow font-black text-2xl md:text-3xl text-white uppercase">TABLEAU DE BORD</h1>
         </div>
-        <button onClick={load} disabled={loading} className="btn-outline text-xs py-2 px-4 flex items-center gap-2">
-          <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> ACTUALISER
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowSettings(true)} className="btn-outline text-xs py-2 px-4 flex items-center gap-2">
+            <Settings size={12} /> PARAMÈTRES
+          </button>
+          <button onClick={load} disabled={loading} className="btn-outline text-xs py-2 px-4 flex items-center gap-2">
+            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> ACTUALISER
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -262,6 +269,10 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           )}
         </div>
       </div>
+
+      {showSettings && (
+        <AdminSettingsModal onClose={() => setShowSettings(false)} />
+      )}
     </div>
   );
 }
