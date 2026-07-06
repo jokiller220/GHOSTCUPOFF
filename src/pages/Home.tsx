@@ -325,7 +325,7 @@ export default function Home({ onNavigate }: HomeProps) {
             { label: 'Joueurs inscrits', value: playerCount },
             { label: 'Équipes 4v4', value: teamCount },
             { label: 'Places restantes', value: availableSlots },
-            { label: 'Tournoi maximum', value: MAX_PLAYERS },
+            { label: 'Tournoi maximum', value: maxPlayers },
           ].map(({ label, value }) => (
             <div key={label} className="text-center">
               <p className="font-barlow font-black text-black text-xl uppercase leading-none">{value}</p>
