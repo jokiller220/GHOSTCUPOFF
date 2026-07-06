@@ -187,7 +187,10 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
     
     // 2. Update config with lobbies
     const newConfig = { ...currentConfig, lobbies: soloLobbyRounds };
-    const { error: updateError } = await supabase.from('schedule_config').update({ config: newConfig }).eq('type', 'ffa');
+    const { error: updateError } = await supabase.from('schedule_config').upsert(
+      { type: 'ffa', config: newConfig },
+      { onConflict: 'type' }
+    );
     
     if (updateError) {
       setError('Échec de la sauvegarde des lobbys.');

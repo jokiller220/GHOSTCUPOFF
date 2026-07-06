@@ -123,17 +123,20 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
     setError('');
     
     try {
-      const { error: ffaError } = await supabase.from('schedule_config').update({
+      const { error: ffaError } = await supabase.from('schedule_config').upsert({
+        type: 'ffa',
         config: { dates: [{ date: "2026-07-08", time: "21:00" }, { date: "2026-07-08", time: "21:30" }, { date: "2026-07-08", time: "22:00" }, { date: "2026-07-08", time: "22:30" }] }
-      }).eq('type', 'ffa');
+      }, { onConflict: 'type' });
       
-      const { error: rrError } = await supabase.from('schedule_config').update({
+      const { error: rrError } = await supabase.from('schedule_config').upsert({
+        type: 'round_robin',
         config: { dates: [{ date: "2026-07-09", time: "21:00" }, { date: "2026-07-09", time: "21:45" }, { date: "2026-07-09", time: "22:30" }, { date: "2026-07-10", time: "21:00" }, { date: "2026-07-10", time: "21:45" }] }
-      }).eq('type', 'round_robin');
+      }, { onConflict: 'type' });
       
-      const { error: bracketError } = await supabase.from('schedule_config').update({
+      const { error: bracketError } = await supabase.from('schedule_config').upsert({
+        type: 'bracket',
         config: { dates: [{ date: "2026-07-12", times: ["18:00", "19:30", "21:00", "22:30"] }, { date: "2026-07-13", times: ["18:00", "19:30", "21:00", "22:30"] }, { date: "2026-07-14", times: ["18:00", "19:30"] }, { date: "2026-07-15", times: ["20:00"] }] }
-      }).eq('type', 'bracket');
+      }, { onConflict: 'type' });
 
       if (ffaError || rrError || bracketError) throw new Error('Erreur lors de la mise à jour des dates');
       
