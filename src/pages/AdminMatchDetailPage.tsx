@@ -313,10 +313,18 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
                 </thead>
                 <tbody>
                   {[1, 2, 3, 4, 5].map(i => {
+                    const MODE_NAMES_4V4 = [
+                      'Élimination confirmée',
+                      'Domination',
+                      'Match à mort par équipe',
+                      'Recherche et destruction',
+                      'Capture du drapeau'
+                    ];
+                    const mancheName = match.format === '4v4' ? MODE_NAMES_4V4[i - 1] : `Manche ${i}`;
                     const ev = editScores[i] ?? { t1: '', t2: '' };
                     return (
                       <tr key={i} className="border-b border-ghost-border/30">
-                        <td className="py-3 text-ghost-gray text-xs font-barlow">Manche {i}</td>
+                        <td className="py-3 text-ghost-gray text-[10px] sm:text-xs font-barlow pr-2">{mancheName}</td>
                         <td className="py-3 px-2">
                           <input
                             type="number"

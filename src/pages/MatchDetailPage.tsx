@@ -175,12 +175,20 @@ export default function MatchDetailPage({ matchId, onNavigate }: MatchDetailPage
             </thead>
             <tbody>
               {Array.from({ length: totalManches }).map((_, i) => {
+                const MODE_NAMES_4V4 = [
+                  'Élimination confirmée',
+                  'Domination',
+                  'Match à mort par équipe',
+                  'Recherche et destruction',
+                  'Capture du drapeau'
+                ];
+                const mancheName = match.format === '4v4' ? MODE_NAMES_4V4[i] : `Manche ${i + 1}`;
                 const s = scores.find(s => s.manche_number === i + 1);
                 const s1Won = s && s.team1_score > s.team2_score;
                 const s2Won = s && s.team2_score > s.team1_score;
                 return (
                   <tr key={i} className="border-b border-ghost-border/30 last:border-0">
-                    <td className="py-2 text-ghost-gray text-xs font-barlow">Manche {i + 1}</td>
+                    <td className="py-2 text-ghost-gray text-[10px] sm:text-xs font-barlow pr-2">{mancheName}</td>
                     <td className={`py-2 text-sm font-barlow font-black text-center ${s1Won ? 'text-ghost-gold' : 'text-ghost-gray'}`}>
                       {s ? s.team1_score : '—'}
                     </td>
