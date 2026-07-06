@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { Eye, EyeOff, AlertCircle, CheckCircle, Crosshair } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import { Page } from '../types';
 
 interface RegisterPageProps {
@@ -29,6 +30,15 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
     if (!regAccepted) { setRegError('Vous devez accepter le règlement du tournoi.'); return; }
     if (regPassword.length < 6) { setRegError('Le mot de passe doit contenir au moins 6 caractères.'); return; }
     setRegLoading(true);
+    
+    // Check limit
+    const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player');
+    if (count !== null && count >= 24) {
+      setRegError('Le tournoi est complet (24/24 joueurs). Inscription impossible.');
+      setRegLoading(false);
+      return;
+    }
+    
     const { error } = await signUp(regEmail, regPassword, regCod, regName);
     setRegLoading(false);
     if (error) { setRegError(error); return; }

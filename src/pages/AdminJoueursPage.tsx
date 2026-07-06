@@ -76,15 +76,22 @@ export default function AdminJoueursPage() {
     
     const playersInTeams = new Set<string>();
     allTeams?.forEach(t => t.members.forEach((m: any) => playersInTeams.add(m.profile_id)));
-    
     let isolatedPlayers = allPlayers?.filter(p => !playersInTeams.has(p.id)) || [];
+    
+    // Shuffle the isolated players randomly
+    isolatedPlayers.sort(() => Math.random() - 0.5);
     
     for (const team of incompleteTeams) {
       let needed = 4 - team.members.length;
       while (needed > 0 && isolatedPlayers.length > 0) {
         const p = isolatedPlayers.pop();
         if (p) {
-          await supabase.from('team_members').insert({ team_id: team.id, profile_id: p.id, status: 'active' });
+          const { error } = await supabase.from('team_members').insert({ team_id: team.id, profile_id: p.id, status: 'active' });
+          if (error) {
+            setError(`Erreur (team_members): ${error.message}`);
+            setSaving(false);
+            return;
+          }
           needed--;
         }
       }
@@ -98,16 +105,27 @@ export default function AdminJoueursPage() {
       const captain = group[0];
       const isComplete = group.length === 4;
       
-      const { data: newTeam } = await supabase.from('teams').insert({
+      const { data: newTeam, error } = await supabase.from('teams').insert({
         name: `Équipe ${captain.cod_username}`,
         captain_id: captain.id,
         format: '4v4',
         status: isComplete ? 'registered' : 'forming'
       }).select().single();
 
+      if (error) {
+        setError(`Erreur de sécurité (RLS) lors de la création d'équipe: ${error.message}`);
+        setSaving(false);
+        return;
+      }
+
       if (newTeam) {
         const membersToInsert = group.map(p => ({ team_id: newTeam.id, profile_id: p.id, status: 'active' }));
-        await supabase.from('team_members').insert(membersToInsert);
+        const { error: memberError } = await supabase.from('team_members').insert(membersToInsert);
+        if (memberError) {
+           setError(`Erreur membre: ${memberError.message}`);
+           setSaving(false);
+           return;
+        }
       }
     }
 
@@ -138,6 +156,12 @@ export default function AdminJoueursPage() {
           Clôturer & Répartir
         </button>
       </div>
+
+      {error && (
+        <div className="mb-6 bg-ghost-red/10 border border-ghost-red/30 text-ghost-red px-4 py-3 rounded text-xs font-barlow">
+          {error}
+        </div>
+      )}
 
       {success && (
         <div className="mb-6 bg-ghost-green/10 border border-ghost-green/30 text-ghost-green px-4 py-3 rounded text-xs font-barlow">
