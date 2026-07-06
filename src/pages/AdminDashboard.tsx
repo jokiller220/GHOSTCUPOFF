@@ -87,10 +87,11 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     // Active bracket matches
     const { data: activeMatches } = await supabase
       .from('matches')
-      .select('*')
+      .select('*, team1:profiles!matches_team1_id_fkey(cod_username, seed_rank), team2:profiles!matches_team2_id_fkey(cod_username, seed_rank)')
+      .eq('format', '1v1')
       .in('status', ['live', 'scheduled'])
       .order('round_order', { ascending: false })
-      .limit(4);
+      .limit(2);
     const { data: proofs } = await supabase
       .from('score_proofs')
       .select('*')
@@ -103,15 +104,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     setLoading(false);
   }
 
-  // Demo activity data when no real logs exist
-  const demoActivity = [
-    { id: '1', action: 'score_validated', details: { desc: 'Wild Squad vs Team Legend — 4v4 2/4 Finale' }, created_at: new Date().toISOString(), admin_id: undefined },
-    { id: '2', action: 'new_player', details: { desc: 'Nouveau joueur inscrit : Player_2025' }, created_at: new Date(Date.now() - 3600000).toISOString(), admin_id: undefined },
-    { id: '3', action: 'match_scheduled', details: { desc: 'Match programmé : Ghost Unit vs Rapid Fire' }, created_at: new Date(Date.now() - 7200000).toISOString(), admin_id: undefined },
-    { id: '4', action: 'proof_submitted', details: { desc: 'Preuve de score envoyée : Ghost Unit vs Black Ops' }, created_at: new Date(Date.now() - 10800000).toISOString(), admin_id: undefined },
-  ];
-
-  const activity = recentActivity.length > 0 ? recentActivity : (demoActivity as ActivityLog[]);
+  const activity = recentActivity;
 
   function formatTime(d: string) {
     const diff = Date.now() - new Date(d).getTime();
@@ -148,27 +141,33 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         <div className="lg:col-span-2">
           <p className="section-title mb-4">ACTIVITÉ RÉCENTE</p>
           <div className="space-y-2">
-            {activity.map(log => (
-              <div key={log.id} className="card px-4 py-3 flex items-start gap-3">
-                <div className="mt-0.5 shrink-0">
-                  {ACTIVITY_ICONS[log.action] ?? <Clock size={14} className="text-ghost-gray" />}
+            {activity.length > 0 ? (
+              activity.map(log => (
+                <div key={log.id} className="card px-4 py-3 flex items-start gap-3">
+                  <div className="mt-0.5 shrink-0">
+                    {ACTIVITY_ICONS[log.action] ?? <Clock size={14} className="text-ghost-gray" />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white text-xs font-barlow font-bold">
+                      {(log.details as Record<string, string>)?.desc ?? log.action}
+                    </p>
+                    <p className="text-ghost-gray text-[10px] mt-0.5">{formatTime(log.created_at)}</p>
+                  </div>
+                  <span className={`text-[9px] font-barlow font-bold uppercase px-2 py-0.5 border ${
+                    log.action === 'score_validated' ? 'text-ghost-green border-ghost-green/40' :
+                    log.action === 'new_player' ? 'text-ghost-gold border-ghost-gold/40' :
+                    'text-ghost-gray border-ghost-border'
+                  }`}>
+                    {log.action === 'score_validated' ? '4v4' :
+                     log.action === 'new_player' ? '1v1' : '4v4'}
+                  </span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-white text-xs font-barlow font-bold">
-                    {(log.details as Record<string, string>)?.desc ?? log.action}
-                  </p>
-                  <p className="text-ghost-gray text-[10px] mt-0.5">{formatTime(log.created_at)}</p>
-                </div>
-                <span className={`text-[9px] font-barlow font-bold uppercase px-2 py-0.5 border ${
-                  log.action === 'score_validated' ? 'text-ghost-green border-ghost-green/40' :
-                  log.action === 'new_player' ? 'text-ghost-gold border-ghost-gold/40' :
-                  'text-ghost-gray border-ghost-border'
-                }`}>
-                  {log.action === 'score_validated' ? '4v4' :
-                   log.action === 'new_player' ? '1v1' : '4v4'}
-                </span>
+              ))
+            ) : (
+              <div className="card px-4 py-6 text-center text-ghost-gray text-xs font-barlow">
+                Aucune activité récente.
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -178,36 +177,43 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             <p className="section-title">PHASE FINALE 1v1</p>
           </div>
 
-          {/* Top 4 qualifiés */}
-          <div className="card p-4 mb-3 hover:border-ghost-gold/20 transition-all cursor-pointer" onClick={() => onNavigate('admin-brackets')}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-barlow font-black text-ghost-gold text-xs uppercase tracking-wider">1/2 FINALE</span>
-              <span className="text-ghost-gray text-[10px] font-barlow">1v1 BO5</span>
-            </div>
-            <div className="space-y-1.5">
-              {['WILD_JO (#1)', 'Delta_Force (#16)'].map((t, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-ghost-green" />
-                  <span className="text-white text-xs font-barlow">{t}</span>
+          {/* Top qualifiés */}
+          {_activeBracketMatches.length > 0 ? (
+            _activeBracketMatches.map(match => (
+              <div key={match.id} className="card p-4 mb-3 hover:border-ghost-gold/20 transition-all cursor-pointer" onClick={() => onNavigate('admin-brackets')}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-barlow font-black text-ghost-gold text-xs uppercase tracking-wider">
+                    {match.round_order === 1 ? '1/8 FINALE' : match.round_order === 2 ? '1/4 FINALE' : match.round_order === 3 ? '1/2 FINALE' : 'FINALE'}
+                  </span>
+                  <span className="text-ghost-gray text-[10px] font-barlow">1v1 BO{match.best_of}</span>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="card p-4 mb-4 hover:border-ghost-gold/20 transition-all cursor-pointer" onClick={() => onNavigate('admin-brackets')}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-barlow font-black text-ghost-gold text-xs uppercase tracking-wider">1/4 FINALE</span>
-              <span className="text-ghost-gray text-[10px] font-barlow">1v1 BO5</span>
-            </div>
-            <div className="space-y-1.5">
-              {['Ghost_Alpha (#2)', 'Shadow_Sam (#15)'].map((t, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-ghost-gold" />
-                  <span className="text-white text-xs font-barlow">{t}</span>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-ghost-green" />
+                      <span className="text-white text-xs font-barlow">
+                        {(match.team1 as any)?.cod_username ?? 'TBD'} 
+                        <span className="text-ghost-gray"> ({(match.team1 as any)?.seed_rank ? `#${(match.team1 as any).seed_rank}` : 'TBD'})</span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-ghost-gold" />
+                      <span className="text-white text-xs font-barlow">
+                        {(match.team2 as any)?.cod_username ?? 'TBD'} 
+                        <span className="text-ghost-gray"> ({(match.team2 as any)?.seed_rank ? `#${(match.team2 as any).seed_rank}` : 'TBD'})</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              ))}
+              </div>
+            ))
+          ) : (
+            <div className="card px-4 py-6 text-center text-ghost-gray text-xs font-barlow mb-4">
+              Aucun match de phase finale actif.
             </div>
-          </div>
+          )}
 
           <button onClick={() => onNavigate('admin-brackets')} className="btn-gold w-full text-xs py-2.5 flex items-center justify-center gap-2">
             VOIR LES BRACKETS <ChevronRight size={12} />
