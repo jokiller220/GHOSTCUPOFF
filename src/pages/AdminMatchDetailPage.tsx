@@ -402,12 +402,27 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
             <div className="card p-6 space-y-4">
               <div>
                 <label className="block text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-2">Mode de jeu</label>
-                <input
-                  value={paramMode}
-                  onChange={e => setParamMode(e.target.value)}
-                  placeholder="Ex: Mode de jeu"
-                  className="input-dark"
-                />
+                {match?.format === '4v4' ? (
+                  <select
+                    value={paramMode}
+                    onChange={e => setParamMode(e.target.value)}
+                    className="input-dark w-full appearance-none"
+                  >
+                    <option value="">Sélectionnez un mode...</option>
+                    <option value="Élimination confirmée">Élimination confirmée</option>
+                    <option value="Domination">Domination</option>
+                    <option value="Match à mort par équipe">Match à mort par équipe</option>
+                    <option value="Recherche et destruction">Recherche et destruction</option>
+                    <option value="Capture du drapeau">Capture du drapeau</option>
+                  </select>
+                ) : (
+                  <input
+                    value={paramMode}
+                    onChange={e => setParamMode(e.target.value)}
+                    placeholder="Ex: Mode de jeu"
+                    className="input-dark w-full"
+                  />
+                )}
               </div>
               <div>
                 <label className="block text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-2">Carte</label>

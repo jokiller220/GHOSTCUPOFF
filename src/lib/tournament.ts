@@ -42,7 +42,13 @@ function formatScheduledAt(date: string, time: string) {
   return `${date}T${timeStr}+02:00`;
 }
 
-const MODES_4V4 = ["Point Stratégique", "Recherche et Destruction", "Contrôle"];
+const MODES_4V4 = [
+  "Élimination confirmée",
+  "Domination",
+  "Match à mort par équipe",
+  "Recherche et destruction",
+  "Capture du drapeau"
+];
 
 export function generateRoundRobinSchedule(teams: TeamEntry[], dates: { date: string; time: string }[] = []): NewMatchRecord[] {
   if (teams.length < 2) throw new Error('Le round robin nécessite au moins 2 équipes.');
@@ -84,7 +90,7 @@ export function generateRoundRobinSchedule(teams: TeamEntry[], dates: { date: st
         status: 'scheduled',
         scheduled_at: formatScheduledAt(dateInfo.date, dateInfo.time),
         map: null,
-        mode: MODES_4V4[Math.floor(Math.random() * MODES_4V4.length)],
+        mode: MODES_4V4[round % MODES_4V4.length],
         admin_notes: null,
         next_match_id: null,
       });
