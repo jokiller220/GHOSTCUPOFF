@@ -17,7 +17,13 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
   const [scores, setScores] = useState<MatchScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<ActiveTab>('score');
+  
+  // Params state
   const [scheduledAt, setScheduledAt] = useState('');
+  const [paramMode, setParamMode] = useState('');
+  const [paramMap, setParamMap] = useState('');
+  const [paramNotes, setParamNotes] = useState('');
+
   const [editScores, setEditScores] = useState<Record<number, { t1: string; t2: string }>>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -37,6 +43,13 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
       .eq('id', matchId)
       .maybeSingle();
     setMatch(data as Match);
+    
+    if (data) {
+      setScheduledAt(data.scheduled_at ? data.scheduled_at.substring(0, 16) : '');
+      setParamMode(data.mode || '');
+      setParamMap(data.map || '');
+      setParamNotes(data.admin_notes || '');
+    }
 
     const { data: sc } = await supabase
       .from('match_scores')
@@ -160,6 +173,27 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
     await load();
     setSuccess('Match suivant lancé.');
     setTimeout(() => setSuccess(''), 3000);
+    setSaving(false);
+  }
+
+  async function saveParams() {
+    setSaving(true);
+    setError('');
+    setSuccess('');
+    try {
+      await supabase.from('matches').update({
+        mode: paramMode,
+        map: paramMap,
+        admin_notes: paramNotes,
+        scheduled_at: scheduledAt || null
+      }).eq('id', matchId);
+      
+      await load();
+      setSuccess('Paramètres du match enregistrés.');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch {
+      setError('Erreur lors de la sauvegarde.');
+    }
     setSaving(false);
   }
 
@@ -358,31 +392,30 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
 
           {activeTab === 'params' && (
             <div className="card p-6 space-y-4">
-              {[
-                { label: 'Mode de jeu', value: match.mode ?? '', field: 'mode' },
-                { label: 'Carte', value: match.map ?? '', field: 'map' },
-              ].map(({ label, value, field }) => (
-                <div key={field}>
-                  <label className="block text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-2">{label}</label>
-                  <input
-                    defaultValue={value}
-                    placeholder={`Ex: ${label}`}
-                    className="input-dark"
-                    onBlur={async e => {
-                      await supabase.from('matches').update({ [field]: e.target.value }).eq('id', matchId);
-                    }}
-                  />
-                </div>
-              ))}
+              <div>
+                <label className="block text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-2">Mode de jeu</label>
+                <input
+                  value={paramMode}
+                  onChange={e => setParamMode(e.target.value)}
+                  placeholder="Ex: Mode de jeu"
+                  className="input-dark"
+                />
+              </div>
+              <div>
+                <label className="block text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-2">Carte</label>
+                <input
+                  value={paramMap}
+                  onChange={e => setParamMap(e.target.value)}
+                  placeholder="Ex: Carte"
+                  className="input-dark"
+                />
+              </div>
               <div>
                 <label className="block text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-2">Horaire du match</label>
                 <input
                   type="datetime-local"
                   value={scheduledAt}
                   onChange={e => setScheduledAt(e.target.value)}
-                  onBlur={async () => {
-                    await supabase.from('matches').update({ scheduled_at: scheduledAt || null }).eq('id', matchId);
-                  }}
                   className="input-dark"
                 />
                 <p className="text-ghost-gray text-[10px] mt-2">Choisissez une heure de soirée pour le match.</p>
@@ -390,13 +423,20 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
               <div>
                 <label className="block text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-2">Notes admin</label>
                 <textarea
-                  defaultValue={match.admin_notes ?? ''}
+                  value={paramNotes}
+                  onChange={e => setParamNotes(e.target.value)}
                   rows={3}
                   className="input-dark resize-none"
-                  onBlur={async e => {
-                    await supabase.from('matches').update({ admin_notes: e.target.value }).eq('id', matchId);
-                  }}
                 />
+              </div>
+              <div className="pt-4 border-t border-ghost-border mt-4">
+                <button 
+                  onClick={saveParams}
+                  disabled={saving}
+                  className="btn-gold text-xs py-3 w-full flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <Check size={14} /> ENREGISTRER LES PARAMÈTRES
+                </button>
               </div>
             </div>
           )}
