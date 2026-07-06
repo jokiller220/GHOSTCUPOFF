@@ -198,8 +198,10 @@ export default function AdminFFAPage() {
                         disabled={loading || saving}
                       >
                         <option value="">-- Sélectionner le joueur à cette place --</option>
-                        {availablePlayers.map(p => (
-                          <option key={p.id} value={p.id}>{p.name}</option>
+                        {availablePlayers
+                          .filter(p => !selections.includes(p.id) || p.id === selectedId)
+                          .map(p => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
                         ))}
                       </select>
                     </div>
