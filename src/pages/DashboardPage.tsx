@@ -27,6 +27,12 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
   const [nextMatch, setNextMatch] = useState<Match | null>(null);
   const [recentMatches, setRecentMatches] = useState<Match[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [stats, setStats] = useState({
+    teamPoints: 0,
+    soloPoints: 0,
+    totalPoints: 0,
+    rank: '-'
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,6 +51,24 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
       .order('created_at', { ascending: false })
       .limit(5);
     setNotifications((notifs as Notification[]) ?? []);
+
+    // Load stats
+    const { data: entry } = await supabase
+      .from('tournament_entries')
+      .select('*')
+      .eq('profile_id', profile!.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+      
+    if (entry) {
+      setStats({
+        teamPoints: entry.team_points || 0,
+        soloPoints: entry.solo_points || 0,
+        totalPoints: entry.total_points || 0,
+        rank: entry.seed ? `#${entry.seed}` : '-'
+      });
+    }
 
     // Load matches (all public matches for display)
     const { data: matches } = await supabase
@@ -106,10 +130,10 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
           <div>
             <p className="section-title">MES STATISTIQUES — TOURNOI UNIFIÉ</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <StatCard label="Pts Équipe" value={16} icon={<Swords size={18} className="text-white" />} color="text-white" />
-              <StatCard label="Pts Solo FFA" value={10} icon={<Star size={18} className="text-ghost-gold" />} color="text-ghost-gold" />
-              <StatCard label="Total Points" value={26} icon={<Trophy size={18} className="text-ghost-gold" />} color="text-ghost-gold" />
-              <StatCard label="Classement" value="#1" icon={<TrendingUp size={18} className="text-ghost-green" />} color="text-ghost-green" />
+              <StatCard label="Pts Équipe" value={stats.teamPoints} icon={<Swords size={18} className="text-white" />} color="text-white" />
+              <StatCard label="Pts Solo FFA" value={stats.soloPoints} icon={<Star size={18} className="text-ghost-gold" />} color="text-ghost-gold" />
+              <StatCard label="Total Points" value={stats.totalPoints} icon={<Trophy size={18} className="text-ghost-gold" />} color="text-ghost-gold" />
+              <StatCard label="Classement" value={stats.rank} icon={<TrendingUp size={18} className="text-ghost-green" />} color="text-ghost-green" />
             </div>
             {/* Breakdown mini bar */}
             <div className="mt-3 card px-3 md:px-5 py-2 md:py-3 flex items-center gap-2 md:gap-4 text-[10px] md:text-xs flex-wrap">
