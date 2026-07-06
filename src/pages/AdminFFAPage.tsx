@@ -10,7 +10,7 @@ interface RankedPlayer {
 
 interface FFALobby {
   name: string;
-  players: { id: string; cod_username: string; real_name: string }[];
+  players: { id: string; name: string; team_id?: string }[];
 }
 
 export default function AdminFFAPage() {
@@ -60,7 +60,7 @@ export default function AdminFFAPage() {
     if (lobbyData) {
       const p = lobbyData.players.map(pl => ({
         id: pl.id,
-        name: pl.cod_username + (pl.real_name ? ` (${pl.real_name})` : '')
+        name: pl.name
       }));
       setAvailablePlayers(p);
       setSelections(Array(p.length).fill(''));
@@ -165,7 +165,7 @@ export default function AdminFFAPage() {
                           <div className="grid grid-cols-2 gap-2 text-ghost-gray-light text-xs font-barlow">
                             {lobby.players.map(player => (
                               <div key={player.id} className={`rounded-lg px-3 py-2 truncate border ${isSelected ? 'bg-black/50 border-ghost-gold/20' : 'bg-ghost-dark/80 border-ghost-border/20'}`}>
-                                {player.cod_username}
+                                {player.name}
                               </div>
                             ))}
                           </div>
