@@ -31,6 +31,7 @@ const adminLinks: { label: string; page: Page; icon: ReactNode }[] = [
 export default function AdminLayout({ children, currentPage, onNavigate }: AdminLayoutProps) {
   const { profile, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
 
   async function handleSignOut() {
     await signOut();
@@ -68,16 +69,21 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
       {/* === SIDEBAR === */}
       <aside
         className={`
-          fixed top-0 left-0 h-full z-50 flex flex-col
-          w-64 bg-ghost-dark border-r border-ghost-border
-          transition-transform duration-300
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:w-52 lg:z-40
+          fixed top-0 left-0 h-full z-50 flex flex-col bg-ghost-dark border-r border-ghost-border
+          transition-all duration-300
+          ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'}
+          lg:translate-x-0 lg:z-40 ${desktopCollapsed ? 'lg:w-[60px]' : 'lg:w-52'}
         `}
       >
         {/* Logo + close mobile */}
-        <div className="p-4 border-b border-ghost-border flex items-center justify-between gap-2">
-          <Logo onNavigate={(p) => handleNavigate(p as Page)} size="sm" />
+        <div className={`p-4 border-b border-ghost-border flex items-center gap-2 ${desktopCollapsed ? 'justify-center' : 'justify-between'}`}>
+          {!desktopCollapsed ? (
+            <Logo onNavigate={(p) => handleNavigate(p as Page)} size="sm" />
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-ghost-gold flex items-center justify-center cursor-pointer" onClick={() => handleNavigate('home')}>
+              <span className="font-barlow font-black text-black text-[10px]">G</span>
+            </div>
+          )}
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-ghost-gray hover:text-white p-1"
@@ -87,14 +93,16 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
         </div>
 
         {/* Admin badge */}
-        <div className="px-4 py-3 border-b border-ghost-border">
+        <div className={`py-3 border-b border-ghost-border ${desktopCollapsed ? 'px-0 flex justify-center' : 'px-4'}`}>
           <div className="flex items-center gap-2">
-            <Shield size={14} className="text-ghost-red" />
-            <span className="text-ghost-red font-barlow font-black text-xs uppercase tracking-widest">Admin Panel</span>
+            <Shield size={14} className="text-ghost-red" title="Admin Panel" />
+            {!desktopCollapsed && <span className="text-ghost-red font-barlow font-black text-xs uppercase tracking-widest">Admin</span>}
           </div>
-          <p className="text-ghost-gray text-[10px] uppercase tracking-wider mt-1">
-            {profile?.cod_username ?? 'Admin'}
-          </p>
+          {!desktopCollapsed && (
+            <p className="text-ghost-gray text-[10px] uppercase tracking-wider mt-1 truncate">
+              {profile?.cod_username ?? 'Admin'}
+            </p>
+          )}
         </div>
 
         {/* Navigation */}
@@ -103,38 +111,47 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
             <button
               key={label}
               onClick={() => handleNavigate(page)}
-              className={currentPage === page ? 'sidebar-link-active' : 'sidebar-link'}
+              title={desktopCollapsed ? label : undefined}
+              className={`flex items-center gap-3 px-4 py-3 mx-2 my-0.5 rounded-xl transition-all duration-200 font-barlow font-bold text-xs uppercase tracking-widest ${
+                currentPage === page
+                  ? 'bg-ghost-gold/10 text-ghost-gold'
+                  : 'text-ghost-gray hover:text-white hover:bg-white/5'
+              } ${desktopCollapsed ? 'justify-center px-0' : ''}`}
             >
               <span className={currentPage === page ? 'text-ghost-gold' : 'text-ghost-gray'}>
                 {icon}
               </span>
-              {label}
+              {!desktopCollapsed && <span>{label}</span>}
             </button>
           ))}
         </nav>
 
         {/* Footer actions */}
-        <div className="p-4 border-t border-ghost-border">
+        <div className="p-4 border-t border-ghost-border flex justify-center">
           <button
             onClick={handleSignOut}
-            className="sidebar-link w-full text-ghost-red hover:text-red-400 hover:bg-red-950/20"
+            title={desktopCollapsed ? 'Déconnexion' : undefined}
+            className={`flex items-center gap-3 py-2 rounded-xl transition-all font-barlow font-bold text-xs uppercase tracking-widest text-ghost-red hover:text-red-400 hover:bg-red-950/20 ${desktopCollapsed ? 'justify-center px-2 w-auto' : 'px-4 w-full'}`}
           >
             <LogOut size={16} />
-            Déconnexion
+            {!desktopCollapsed && <span>Déconnexion</span>}
           </button>
         </div>
       </aside>
 
       {/* === MAIN CONTENT === */}
-      <div className="flex-1 lg:ml-52 flex flex-col min-h-[100dvh] relative z-10">
+      <div className={`flex-1 flex flex-col min-h-[100dvh] relative z-10 transition-all duration-300 ${desktopCollapsed ? 'lg:ml-[60px]' : 'lg:ml-52'}`}>
 
         {/* Top bar */}
         <header className="sticky top-0 z-30 bg-ghost-dark/95 backdrop-blur border-b border-ghost-border px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Hamburger mobile */}
+            {/* Hamburger mobile & desktop toggle */}
             <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-ghost-gray hover:text-white p-1"
+              onClick={() => {
+                setSidebarOpen(true);
+                setDesktopCollapsed(!desktopCollapsed);
+              }}
+              className="text-ghost-gray hover:text-white p-1"
             >
               <Menu size={20} />
             </button>
