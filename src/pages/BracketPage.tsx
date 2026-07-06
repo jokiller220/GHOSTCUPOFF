@@ -317,11 +317,17 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
               <span className="font-barlow uppercase tracking-wider text-sm">Chargement...</span>
             </div>
           ) : (
-            <div className="card p-3 md:p-6 border-ghost-border overflow-x-auto">
-              <BracketTree
-                matches={matches}
-                onMatchClick={(m) => onNavigate('match-detail', m.id)}
-              />
+            <div className="card p-3 md:p-6 border-ghost-border overflow-hidden">
+              <div className="text-right mb-2 flex items-center justify-end gap-2 text-ghost-gold/70 text-[10px] uppercase tracking-widest font-barlow">
+                <span>Faites défiler</span>
+                <span className="animate-pulse">👉</span>
+              </div>
+              <div className="overflow-x-auto custom-scrollbar pb-4">
+                <BracketTree
+                  matches={matches}
+                  onMatchClick={(m) => onNavigate('match-detail', m.id)}
+                />
+              </div>
             </div>
           )}
 
