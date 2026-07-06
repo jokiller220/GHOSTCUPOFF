@@ -35,24 +35,24 @@ function MatchCard({ match, onMatchClick, format }: { match: Match; onMatchClick
     <div
       className={`bg-ghost-card border border-ghost-border cursor-pointer hover:border-ghost-gold/50 transition-all duration-200 ${
         match.status === 'live' ? 'border-ghost-red/50' : ''
-      } ${format === '4v4' ? 'w-36 md:w-40' : 'w-44'}`}
+      } ${format === '4v4' ? 'w-32 md:w-36' : 'w-44'}`}
       onClick={() => onMatchClick?.(match)}
     >
-      <div className="flex items-center justify-between px-2 py-0.5 border-b border-ghost-border">
-        <span className="text-ghost-gray text-[9px] font-barlow uppercase tracking-widest truncate flex-1">{match.round_name}</span>
+      <div className={`flex items-center justify-between border-b border-ghost-border ${format === '4v4' ? 'px-1.5 py-0.5' : 'px-2 py-0.5'}`}>
+        <span className={`text-ghost-gray font-barlow uppercase tracking-widest truncate flex-1 ${format === '4v4' ? 'text-[8px]' : 'text-[9px]'}`}>{match.round_name}</span>
         <StatusDot status={match.status} />
       </div>
-      <div className={`flex items-center justify-between px-2 py-1.5 border-b border-ghost-border/50 ${isTeam1Winner ? 'bg-ghost-gold/5' : ''}`}>
-        <span className={`font-barlow font-bold text-xs truncate max-w-[100px] ${isTeam1Winner ? 'text-ghost-gold' : match.winner_id && !isTeam1Winner ? 'text-ghost-gray/50' : 'text-white'}`}>
+      <div className={`flex items-center justify-between border-b border-ghost-border/50 ${isTeam1Winner ? 'bg-ghost-gold/5' : ''} ${format === '4v4' ? 'px-1.5 py-1' : 'px-2 py-1.5'}`}>
+        <span className={`font-barlow font-bold truncate ${isTeam1Winner ? 'text-ghost-gold' : match.winner_id && !isTeam1Winner ? 'text-ghost-gray/50' : 'text-white'} ${format === '4v4' ? 'text-[10px] max-w-[80px]' : 'text-xs max-w-[100px]'}`}>
           {team1}
         </span>
-        {score1 !== null && <span className={`font-barlow font-black text-sm ml-1 ${isTeam1Winner ? 'text-ghost-gold' : 'text-ghost-gray'}`}>{score1}</span>}
+        {score1 !== null && <span className={`font-barlow font-black ml-1 ${isTeam1Winner ? 'text-ghost-gold' : 'text-ghost-gray'} ${format === '4v4' ? 'text-xs' : 'text-sm'}`}>{score1}</span>}
       </div>
-      <div className={`flex items-center justify-between px-2 py-1.5 ${isTeam2Winner ? 'bg-ghost-gold/5' : ''}`}>
-        <span className={`font-barlow font-bold text-xs truncate max-w-[100px] ${isTeam2Winner ? 'text-ghost-gold' : match.winner_id && !isTeam2Winner ? 'text-ghost-gray/50' : 'text-white'}`}>
+      <div className={`flex items-center justify-between ${isTeam2Winner ? 'bg-ghost-gold/5' : ''} ${format === '4v4' ? 'px-1.5 py-1' : 'px-2 py-1.5'}`}>
+        <span className={`font-barlow font-bold truncate ${isTeam2Winner ? 'text-ghost-gold' : match.winner_id && !isTeam2Winner ? 'text-ghost-gray/50' : 'text-white'} ${format === '4v4' ? 'text-[10px] max-w-[80px]' : 'text-xs max-w-[100px]'}`}>
           {team2}
         </span>
-        {score2 !== null && <span className={`font-barlow font-black text-sm ml-1 ${isTeam2Winner ? 'text-ghost-gold' : 'text-ghost-gray'}`}>{score2}</span>}
+        {score2 !== null && <span className={`font-barlow font-black ml-1 ${isTeam2Winner ? 'text-ghost-gold' : 'text-ghost-gray'} ${format === '4v4' ? 'text-xs' : 'text-sm'}`}>{score2}</span>}
       </div>
     </div>
   );
@@ -78,7 +78,7 @@ export default function BracketTree({ matches, onMatchClick, format = '1v1' }: B
 
   return (
     <div className="pb-4 min-w-0">
-      <div className={`flex items-stretch min-w-max py-4 px-2 ${format === '4v4' ? 'gap-4 md:gap-6' : 'gap-8'}`}>
+      <div className={`flex items-stretch min-w-max py-4 px-2 ${format === '4v4' ? 'gap-2 md:gap-4' : 'gap-8'}`}>
         {rounds.map((round, roundIdx) => (
           <div key={round.order} className="flex flex-col">
             {/* Round header */}
