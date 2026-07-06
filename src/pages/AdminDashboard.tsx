@@ -55,12 +55,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
     // Stats
     const [
+      { data: settings },
       { count: playerCount },
       { count: teamCount },
       { count: playedCount },
       { count: pendingCount },
       { count: proofsPendingCount },
     ] = await Promise.all([
+      supabase.from('tournament_settings').select('max_players').single(),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player'),
       supabase.from('teams').select('*', { count: 'exact', head: true }),
       supabase.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
@@ -69,13 +71,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     ]);
 
     const players = playerCount ?? 0;
-      setStats({
-        players,
-        teams: teamCount ?? 0,
-        matchesPlayed: playedCount ?? 0,
-        matchesPending: pendingCount ?? 0,
-        proofsPending: proofsPendingCount ?? 0,
-        availableSlots: Math.max(0, 24 - players),
+    const maxPlayers = settings?.max_players ?? 28;
+    setStats({
+      players,
+      teams: teamCount ?? 0,
+      matchesPlayed: playedCount ?? 0,
+      matchesPending: pendingCount ?? 0,
+      proofsPending: proofsPendingCount ?? 0,
+      availableSlots: Math.max(0, maxPlayers - players),
     });
 
     // Activity logs
