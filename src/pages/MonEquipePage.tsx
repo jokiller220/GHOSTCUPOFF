@@ -134,6 +134,19 @@ export default function MonEquipePage({ onNavigate: _onNavigate }: MonEquipePage
 
     if (!foundTeam) { setJoinError('Code invalide ou équipe introuvable.'); setJoinLoading(false); return; }
 
+    const { data: currentMembers } = await supabase
+      .from('team_members')
+      .select('id')
+      .eq('team_id', foundTeam.id)
+      .neq('status', 'kicked');
+      
+    const maxMembers = foundTeam.format === '4v4' ? 4 : 1;
+    if (currentMembers && currentMembers.length >= maxMembers) {
+      setJoinError(`Cette équipe est déjà complète (${maxMembers} joueurs max).`);
+      setJoinLoading(false);
+      return;
+    }
+
     const { error } = await supabase.from('team_members').insert({
       team_id: foundTeam.id,
       profile_id: profile!.id,

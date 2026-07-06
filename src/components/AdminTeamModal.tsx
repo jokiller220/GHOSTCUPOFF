@@ -59,6 +59,13 @@ export function AdminTeamModal({ team, allPlayers, onClose, onUpdate }: AdminTea
 
   async function handleAddMember() {
     if (!selectedPlayer) return;
+    
+    const maxMembers = team.format === '4v4' ? 4 : 1;
+    if (activeMembers.length >= maxMembers) {
+      setError(`Cette équipe est déjà complète (${maxMembers} joueurs max).`);
+      return;
+    }
+
     setSaving(true);
     setError('');
     const { error: err } = await supabase.from('team_members').insert({
