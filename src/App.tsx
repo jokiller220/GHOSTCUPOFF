@@ -26,6 +26,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import ParametresPage from './pages/ParametresPage';
 import MatchDetailPage from './pages/MatchDetailPage';
 import PreuveScorePage from './pages/PreuveScorePage';
+import MaintenancePage from './pages/MaintenancePage';
 
 // Admin pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -42,6 +43,7 @@ const ADMIN_PAGES: Page[] = ['admin', 'admin-matchs', 'admin-joueurs', 'admin-br
 
 function AppContent() {
   const { profile, loading } = useAuth();
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [currentPage, setCurrentPage] = useState<Page>(() => {
     const hash = window.location.hash.replace('#', '');
     return hash ? (hash.split('/')[0] as Page) : 'home';
@@ -64,7 +66,26 @@ function AppContent() {
       }
     };
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    
+    // Check maintenance mode
+    async function checkMaintenance() {
+      const { data } = await supabase.from('tournament_settings').select('maintenance_mode').single();
+      if (data) {
+        setMaintenanceMode(data.maintenance_mode);
+      }
+    }
+    
+    checkMaintenance();
+    
+    const settingsChannel = supabase
+      .channel('app-settings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tournament_settings' }, checkMaintenance)
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      supabase.removeChannel(settingsChannel);
+    };
   }, []);
 
   const navigate = useCallback((page: Page, data?: unknown) => {
@@ -89,6 +110,11 @@ function AppContent() {
       navigate('admin');
     }
   }, [profile, currentPage, navigate]);
+
+  // Maintenance mode block for non-admins
+  if (maintenanceMode && profile?.role !== 'admin') {
+    return <MaintenancePage />;
+  }
 
   if (loading) {
     return (

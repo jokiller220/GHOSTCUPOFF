@@ -16,6 +16,7 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
   const [startDate, setStartDate] = useState('');
   const [finalDate, setFinalDate] = useState('');
   const [maxPlayers, setMaxPlayers] = useState(28);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -35,6 +36,7 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
         setStartDate(formatForInput(data.start_date));
         setFinalDate(formatForInput(data.final_date));
         setMaxPlayers(data.max_players);
+        setMaintenanceMode(data.maintenance_mode ?? false);
       }
       setLoading(false);
     }
@@ -54,7 +56,8 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
       const { error: err } = await supabase.from('tournament_settings').update({
         start_date: startIso,
         final_date: finalIso,
-        max_players: maxPlayers
+        max_players: maxPlayers,
+        maintenance_mode: maintenanceMode
       }).eq('id', 1);
 
       if (err) throw err;
@@ -135,6 +138,22 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
                 className="input-dark w-full"
                 required
               />
+            </div>
+
+            <div className="flex items-center justify-between bg-black/40 p-4 border border-ghost-border">
+              <div>
+                <p className="font-barlow font-bold text-white uppercase tracking-wider text-sm">Mode Maintenance</p>
+                <p className="text-ghost-gray text-[10px] font-barlow uppercase tracking-widest mt-1">Bloque l'accès aux joueurs</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={maintenanceMode}
+                  onChange={(e) => setMaintenanceMode(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-ghost-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ghost-gold"></div>
+              </label>
             </div>
 
             <div className="pt-4 border-t border-ghost-border">

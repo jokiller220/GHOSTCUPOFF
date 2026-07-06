@@ -32,6 +32,14 @@ export interface Team {
   members?: TeamMember[];
 }
 
+export interface TournamentSettings {
+  id: number;
+  start_date: string;
+  final_date: string;
+  max_players: number;
+  maintenance_mode: boolean;
+}
+
 export interface TeamMember {
   id: string;
   team_id: string;
