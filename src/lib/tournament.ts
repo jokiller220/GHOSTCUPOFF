@@ -41,30 +41,41 @@ function formatScheduledAt(date: string, time: string) {
 }
 
 export function generateRoundRobinSchedule(teams: TeamEntry[], dates: { date: string; time: string }[] = []): NewMatchRecord[] {
-  if (teams.length !== 6) throw new Error('Le round robin attend exactement 6 équipes.');
+  if (teams.length < 2) throw new Error('Le round robin nécessite au moins 2 équipes.');
 
-  const fixed = teams[0];
-  const rotating = teams.slice(1).map((team) => ({ ...team }));
   const matches: NewMatchRecord[] = [];
+  const dummy = { id: 'dummy', name: 'dummy' };
+  
+  // Add a dummy team if the number of teams is odd
+  const activeTeams = teams.length % 2 === 1 ? [...teams, dummy] : [...teams];
+  
+  const totalRounds = activeTeams.length - 1;
+  const halfSize = activeTeams.length / 2;
 
-  for (let round = 0; round < 5; round += 1) {
+  // We fix the first team and rotate the others
+  const fixed = activeTeams[0];
+  const rotating = activeTeams.slice(1);
+
+  for (let round = 0; round < totalRounds; round += 1) {
     const dateInfo = dates[round] ?? { date: '2026-07-09', time: '18:00:00' };
-    const pairings = [
-      [fixed, rotating[rotating.length - 1]],
-      [rotating[0], rotating[rotating.length - 2]],
-      [rotating[1], rotating[rotating.length - 3]],
-    ];
+    
+    // Pairings for this round
+    for (let i = 0; i < halfSize; i++) {
+      const t1 = i === 0 ? fixed : rotating[i - 1];
+      const t2 = rotating[rotating.length - 1 - i];
+      
+      // If one of the teams is the dummy, the other gets a bye
+      if (t1.id === 'dummy' || t2.id === 'dummy') continue;
 
-    pairings.forEach((pair, idx) => {
       matches.push({
         format: '4v4',
         round_name: `Tour ${round + 1}`,
         round_order: round + 1,
-        match_order: idx + 1,
-        team1_id: pair[0].id,
-        team2_id: pair[1].id,
-        team1_name: pair[0].name,
-        team2_name: pair[1].name,
+        match_order: 1, // Will be fixed below
+        team1_id: t1.id,
+        team2_id: t2.id,
+        team1_name: t1.name,
+        team2_name: t2.name,
         winner_id: null,
         status: 'scheduled',
         scheduled_at: formatScheduledAt(dateInfo.date, dateInfo.time),
@@ -73,9 +84,21 @@ export function generateRoundRobinSchedule(teams: TeamEntry[], dates: { date: st
         admin_notes: null,
         next_match_id: null,
       });
-    });
+    }
 
+    // Rotate the array
     rotating.unshift(rotating.pop() as TeamEntry);
+  }
+
+  // Fix match_order sequentially per round
+  let currentRound = -1;
+  let currentOrder = 1;
+  for (const m of matches) {
+    if (m.round_order !== currentRound) {
+      currentRound = m.round_order;
+      currentOrder = 1;
+    }
+    m.match_order = currentOrder++;
   }
 
   return matches;

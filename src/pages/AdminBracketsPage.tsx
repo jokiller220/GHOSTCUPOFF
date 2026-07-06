@@ -53,13 +53,13 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
     setError(null);
 
     const [{ data: teamsData, error: teamsError }, { data: configData }] = await Promise.all([
-      supabase.from('teams').select('id, name').eq('format', '4v4').eq('status', 'active').order('created_at', { ascending: true }).limit(6),
+      supabase.from('teams').select('id, name').eq('format', '4v4').eq('status', 'active').order('created_at', { ascending: true }),
       supabase.from('schedule_config').select('config').eq('type', 'round_robin').single()
     ]);
 
     const teams = (teamsData as { id: string; name: string }[] | null) ?? [];
-    if (teams.length !== 6 || teamsError) {
-      setError('6 équipes actives 4v4 sont nécessaires pour créer le round robin.');
+    if (teams.length < 2 || teamsError) {
+      setError('Au moins 2 équipes actives 4v4 sont nécessaires pour créer le round robin.');
       setLoading(false);
       return;
     }
