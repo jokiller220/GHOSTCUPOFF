@@ -43,16 +43,15 @@ export default function AdminFFAPage() {
     setLoading(false);
   }
 
-  function handleSelectLobby(e: React.ChangeEvent<HTMLSelectElement>) {
-    const val = e.target.value;
-    if (!val) {
+  function selectLobbyByIndices(r: number, l: number) {
+    if (selectedLobbyInfo?.round === r && selectedLobbyInfo?.lobbyIndex === l) {
+      // Unselect if clicking the same lobby
       setSelectedLobbyInfo(null);
       setSelections([]);
       setAvailablePlayers([]);
       return;
     }
-    
-    const [r, l] = val.split('-').map(Number);
+
     setSelectedLobbyInfo({ round: r, lobbyIndex: l });
     
     const roundData = lobbies.find(x => x.round === r);
@@ -139,24 +138,45 @@ export default function AdminFFAPage() {
             </div>
           )}
 
-          <div className="mb-8">
-            <label className="block text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-2">Sélectionner un lobby</label>
-            <select
-              className="input-dark w-full text-sm"
-              value={selectedLobbyInfo ? `${selectedLobbyInfo.round}-${selectedLobbyInfo.lobbyIndex}` : ''}
-              onChange={handleSelectLobby}
-              disabled={loading || saving}
-            >
-              <option value="">-- Choisir un lobby --</option>
-              {lobbies.map((round) => 
-                round.lobbies.map((lobby, idx) => (
-                  <option key={`${round.round}-${idx}`} value={`${round.round}-${idx}`}>
-                    Partie {round.round} — {lobby.name}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
+          {/* Grille de sélection des lobbys */}
+          {lobbies.length > 0 && (
+            <div className="space-y-6 mb-10 border-b border-ghost-border/30 pb-10">
+              {lobbies.map((round) => (
+                <div key={round.round}>
+                  <p className="font-barlow font-black text-ghost-gold uppercase text-sm md:text-base tracking-[0.2em] mb-4">
+                    Partie {round.round}
+                  </p>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {round.lobbies.map((lobby, idx) => {
+                      const isSelected = selectedLobbyInfo?.round === round.round && selectedLobbyInfo?.lobbyIndex === idx;
+                      return (
+                        <div 
+                          key={idx} 
+                          onClick={() => selectLobbyByIndices(round.round, idx)}
+                          className={`rounded-2xl border p-4 transition-all cursor-pointer ${
+                            isSelected 
+                              ? 'border-ghost-gold bg-ghost-gold/5 shadow-[0_0_15px_rgba(255,215,0,0.1)]' 
+                              : 'border-ghost-border/30 bg-black/30 hover:border-ghost-gold/50'
+                          }`}
+                        >
+                          <p className={`font-barlow font-bold text-[11px] uppercase tracking-wider mb-3 ${isSelected ? 'text-ghost-gold' : 'text-white'}`}>
+                            {lobby.name}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 text-ghost-gray-light text-xs font-barlow">
+                            {lobby.players.map(player => (
+                              <div key={player.id} className={`rounded-lg px-3 py-2 truncate border ${isSelected ? 'bg-black/50 border-ghost-gold/20' : 'bg-ghost-dark/80 border-ghost-border/20'}`}>
+                                {player.cod_username}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {availablePlayers.length > 0 && (
             <>
@@ -206,40 +226,6 @@ export default function AdminFFAPage() {
           )}
         </div>
 
-        {/* Visualiser la disposition de tous les lobbys */}
-        {lobbies.length > 0 && (
-          <div className="card p-6 mt-6">
-            <h2 className="font-barlow font-black text-white text-xl uppercase tracking-wider mb-6 flex items-center gap-2">
-              <Target className="text-ghost-gold" size={20} />
-              Disposition globale des lobbys
-            </h2>
-            <div className="space-y-6">
-              {lobbies.map((round) => (
-                <div key={round.round} className="border-b border-ghost-border/30 pb-6 last:border-0 last:pb-0">
-                  <p className="font-barlow font-black text-ghost-gold uppercase text-sm md:text-base tracking-[0.2em] mb-4">
-                    Partie {round.round}
-                  </p>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {round.lobbies.map((lobby, idx) => (
-                      <div key={idx} className="rounded-2xl border border-ghost-border/30 bg-black/30 p-4 hover:border-ghost-border/50 transition-colors">
-                        <p className="font-barlow font-bold text-white text-[11px] uppercase tracking-wider mb-3">
-                          {lobby.name}
-                        </p>
-                        <div className="grid grid-cols-2 gap-2 text-ghost-gray-light text-xs font-barlow">
-                          {lobby.players.map(player => (
-                            <div key={player.id} className="rounded-lg bg-ghost-dark/80 px-3 py-2 truncate border border-ghost-border/20">
-                              {player.cod_username}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
