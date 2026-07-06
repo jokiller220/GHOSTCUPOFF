@@ -352,6 +352,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
             <BracketTree
               matches={matches}
               onMatchClick={m => onNavigate('admin-match-detail', m.id)}
+              format={format}
             />
           </div>
         </div>

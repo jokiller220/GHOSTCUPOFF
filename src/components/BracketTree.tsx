@@ -3,6 +3,7 @@ import { Match } from '../types';
 interface BracketTreeProps {
   matches: Match[];
   onMatchClick?: (match: Match) => void;
+  format?: '1v1' | '4v4';
 }
 
 interface Round {
@@ -57,7 +58,7 @@ function MatchCard({ match, onMatchClick }: { match: Match; onMatchClick?: (m: M
   );
 }
 
-export default function BracketTree({ matches, onMatchClick }: BracketTreeProps) {
+export default function BracketTree({ matches, onMatchClick, format = '1v1' }: BracketTreeProps) {
   const roundsMap = new Map<number, Round>();
   matches.forEach(m => {
     if (!roundsMap.has(m.round_order)) {
@@ -90,13 +91,13 @@ export default function BracketTree({ matches, onMatchClick }: BracketTreeProps)
             {/* Matches in round */}
             <div
               className="flex flex-col flex-1"
-              style={{ gap: roundIdx === 0 ? '8px' : `${Math.pow(2, roundIdx) * 8 + 48}px` }}
+              style={{ gap: format === '4v4' ? '8px' : (roundIdx === 0 ? '8px' : `${Math.pow(2, roundIdx) * 8 + 48}px`) }}
             >
               {round.matches.sort((a, b) => a.match_order - b.match_order).map(match => (
                 <div key={match.id} className="flex items-center">
                   <MatchCard match={match} onMatchClick={onMatchClick} />
                   {/* Connector line */}
-                  {roundIdx < rounds.length - 1 && (
+                  {format === '1v1' && roundIdx < rounds.length - 1 && (
                     <div className="w-8 h-px bg-ghost-border ml-0" />
                   )}
                 </div>
@@ -106,7 +107,7 @@ export default function BracketTree({ matches, onMatchClick }: BracketTreeProps)
         ))}
 
         {/* Champion */}
-        {rounds.length >= 2 && (
+        {format === '1v1' && rounds.length >= 2 && (
           <div className="flex flex-col items-center justify-center">
             <div className="mb-4 text-center">
               <span className="text-ghost-gold font-barlow font-black text-xs uppercase tracking-widest">CHAMPION</span>
