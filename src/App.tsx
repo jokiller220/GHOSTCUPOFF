@@ -118,7 +118,7 @@ function AppContent() {
   }
 
   // Player dashboard layout
-  const isDashboardPage = PLAYER_PAGES.includes(currentPage) || ['bracket', 'planning'].includes(currentPage);
+  const isDashboardPage = PLAYER_PAGES.includes(currentPage) || ['bracket', 'planning', 'reglement', 'recompenses'].includes(currentPage);
   if (isDashboardPage && profile) {
     return (
       <DashboardLayout currentPage={currentPage} onNavigate={navigate}>
@@ -129,6 +129,8 @@ function AppContent() {
         {currentPage === 'parametres' && <ParametresPage onNavigate={navigate} />}
         {currentPage === 'bracket' && <BracketPage onNavigate={navigate} />}
         {currentPage === 'planning' && <PlanningPage onNavigate={navigate} />}
+        {currentPage === 'reglement' && <Reglement />}
+        {currentPage === 'recompenses' && <Recompenses />}
         {currentPage === 'match-detail' && (
           <MatchDetailPage matchId={pageData as string} onNavigate={navigate} />
         )}
