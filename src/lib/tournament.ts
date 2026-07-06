@@ -47,7 +47,9 @@ const MODES_4V4 = [
   "Domination",
   "Match à mort par équipe",
   "Recherche et destruction",
-  "Capture du drapeau"
+  "Capture du drapeau",
+  "Point stratégique",
+  "Ligne de front"
 ];
 
 export function generateRoundRobinSchedule(teams: TeamEntry[], dates: { date: string; time: string }[] = []): NewMatchRecord[] {
