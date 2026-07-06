@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Page } from './types';
+import { supabase } from './lib/supabase';
 
 // Layouts
 import PublicLayout from './components/PublicLayout';
