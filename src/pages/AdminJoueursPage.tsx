@@ -105,8 +105,9 @@ export default function AdminJoueursPage() {
       const captain = group[0];
       const isComplete = group.length === 4;
       
+      const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
       const { data: newTeam, error } = await supabase.from('teams').insert({
-        name: `Équipe ${captain.cod_username}`,
+        name: `Équipe ${captain.cod_username} #${randomSuffix}`,
         captain_id: captain.id,
         format: '4v4',
         status: isComplete ? 'registered' : 'forming'
