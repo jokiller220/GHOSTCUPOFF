@@ -18,7 +18,7 @@ function StatusDot({ status }: { status: Match['status'] }) {
   return <span className="w-2 h-2 rounded-full bg-ghost-border inline-block" />;
 }
 
-function MatchCard({ match, onMatchClick }: { match: Match; onMatchClick?: (m: Match) => void }) {
+function MatchCard({ match, onMatchClick, format }: { match: Match; onMatchClick?: (m: Match) => void; format?: string }) {
   const team1 = match.team1_name ?? 'À déterminer';
   const team2 = match.team2_name ?? 'À déterminer';
   const isTeam1Winner = match.winner_id === match.team1_id;
@@ -33,9 +33,9 @@ function MatchCard({ match, onMatchClick }: { match: Match; onMatchClick?: (m: M
 
   return (
     <div
-      className={`bg-ghost-card border border-ghost-border w-44 cursor-pointer hover:border-ghost-gold/50 transition-all duration-200 ${
+      className={`bg-ghost-card border border-ghost-border cursor-pointer hover:border-ghost-gold/50 transition-all duration-200 ${
         match.status === 'live' ? 'border-ghost-red/50' : ''
-      }`}
+      } ${format === '4v4' ? 'w-36 md:w-40' : 'w-44'}`}
       onClick={() => onMatchClick?.(match)}
     >
       <div className="flex items-center justify-between px-2 py-0.5 border-b border-ghost-border">
@@ -77,8 +77,8 @@ export default function BracketTree({ matches, onMatchClick, format = '1v1' }: B
   }
 
   return (
-    <div className="pb-4">
-      <div className="flex gap-8 items-stretch min-w-max py-4 px-2">
+    <div className="pb-4 min-w-0">
+      <div className={`flex items-stretch min-w-max py-4 px-2 ${format === '4v4' ? 'gap-4 md:gap-6' : 'gap-8'}`}>
         {rounds.map((round, roundIdx) => (
           <div key={round.order} className="flex flex-col">
             {/* Round header */}
@@ -95,7 +95,7 @@ export default function BracketTree({ matches, onMatchClick, format = '1v1' }: B
             >
               {round.matches.sort((a, b) => a.match_order - b.match_order).map(match => (
                 <div key={match.id} className="flex items-center">
-                  <MatchCard match={match} onMatchClick={onMatchClick} />
+                  <MatchCard match={match} onMatchClick={onMatchClick} format={format} />
                   {/* Connector line */}
                   {format === '1v1' && roundIdx < rounds.length - 1 && (
                     <div className="w-8 h-px bg-ghost-border ml-0" />
