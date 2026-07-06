@@ -53,8 +53,8 @@ export default function Home({ onNavigate }: HomeProps) {
       
       const maxP = settings?.max_players ?? 28;
       if (settings) {
-        setStartDate(settings.start_date);
-        setFinalDate(settings.final_date);
+        if (settings.start_date) setStartDate(settings.start_date);
+        if (settings.final_date) setFinalDate(settings.final_date);
         setMaxPlayers(maxP);
       }
       
@@ -186,14 +186,22 @@ export default function Home({ onNavigate }: HomeProps) {
             <div className="mb-8">
               <p className="font-barlow text-ghost-gray text-xs uppercase tracking-widest mb-1">Finale</p>
               <p className="font-barlow font-black text-white text-2xl md:text-3xl uppercase tracking-wider">
-                {new Date(finalDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase()}
+                {(() => {
+                  try {
+                    const d = new Date(finalDate);
+                    if (isNaN(d.getTime())) return 'À DÉTERMINER';
+                    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+                  } catch (e) {
+                    return 'À DÉTERMINER';
+                  }
+                })()}
               </p>
             </div>
 
             {/* Countdown */}
             <div className="mb-10">
               <p className="font-barlow text-ghost-gray text-xs uppercase tracking-widest mb-4">Compte à rebours</p>
-              <Countdown targetDate={new Date(startDate)} />
+              <Countdown targetDate={startDate} />
             </div>
 
             {/* CTA buttons */}
