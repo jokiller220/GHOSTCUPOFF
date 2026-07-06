@@ -11,7 +11,7 @@ interface HomeProps {
   onNavigate: (page: Page) => void;
 }
 
-const MAX_PLAYERS = 24;
+const MAX_PLAYERS = 26;
 const START_DATE = '2026-07-08T00:00:00';
 const FINAL_DATE = '2026-07-15T20:00:00';
 

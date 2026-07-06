@@ -33,8 +33,8 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
     
     // Check limit
     const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player');
-    if (count !== null && count >= 24) {
-      setRegError('Le tournoi est complet (24/24 joueurs). Inscription impossible.');
+    if (count !== null && count >= 26) {
+      setRegError('Le tournoi est complet (26/26 joueurs). Inscription impossible.');
       setRegLoading(false);
       return;
     }

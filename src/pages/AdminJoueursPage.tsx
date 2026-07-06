@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Users, Search, Crown, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Profile, Team, TeamStatus } from '../types';
+import { AdminTeamModal } from '../components/AdminTeamModal';
 
 export default function AdminJoueursPage() {
   const [players, setPlayers] = useState<Profile[]>([]);
@@ -11,19 +12,22 @@ export default function AdminJoueursPage() {
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
   useEffect(() => { load(); }, [tab]);
 
   async function load() {
     setLoading(true);
-    if (tab === 'players') {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'player')
-        .order('created_at', { ascending: false });
-      setPlayers((data as Profile[]) ?? []);
-    } else {
+    
+    // We always need players for the Teams tab (AdminTeamModal needs allPlayers)
+    const { data: playersData } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    setPlayers((playersData as Profile[]) ?? []);
+
+    if (tab === 'teams') {
       const { data } = await supabase
         .from('teams')
         .select('*, captain:profiles(cod_username), members:team_members(*)')
@@ -254,7 +258,13 @@ export default function AdminJoueursPage() {
               <span className={`text-[9px] font-barlow font-bold uppercase border px-2 py-0.5 ${STATUS_COLORS[t.status] ?? 'text-ghost-gray border-ghost-border'}`}>
                 {t.status}
               </span>
-              <div className="flex flex-col gap-2 mt-3">
+              <button 
+                onClick={() => setSelectedTeam(t)}
+                className="btn-outline text-[10px] py-1 px-3 ml-2"
+              >
+                ÉDITER
+              </button>
+              <div className="flex flex-col gap-2 mt-3 w-full sm:w-auto">
                 {t.status === 'forming' && (
                   <button
                     onClick={() => updateTeamStatus(t.id, 'registered')}
@@ -289,6 +299,18 @@ export default function AdminJoueursPage() {
             </div>
           )}
         </div>
+      )}
+
+      {selectedTeam && (
+        <AdminTeamModal 
+          team={selectedTeam} 
+          allPlayers={players} 
+          onClose={() => setSelectedTeam(null)} 
+          onUpdate={() => {
+            load();
+            setSelectedTeam(null);
+          }} 
+        />
       )}
     </div>
   );
