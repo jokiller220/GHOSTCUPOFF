@@ -205,6 +205,41 @@ export default function AdminFFAPage() {
             </>
           )}
         </div>
+
+        {/* Visualiser la disposition de tous les lobbys */}
+        {lobbies.length > 0 && (
+          <div className="card p-6 mt-6">
+            <h2 className="font-barlow font-black text-white text-xl uppercase tracking-wider mb-6 flex items-center gap-2">
+              <Target className="text-ghost-gold" size={20} />
+              Disposition globale des lobbys
+            </h2>
+            <div className="space-y-6">
+              {lobbies.map((round) => (
+                <div key={round.round} className="border-b border-ghost-border/30 pb-6 last:border-0 last:pb-0">
+                  <p className="font-barlow font-black text-ghost-gold uppercase text-sm md:text-base tracking-[0.2em] mb-4">
+                    Partie {round.round}
+                  </p>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {round.lobbies.map((lobby, idx) => (
+                      <div key={idx} className="rounded-2xl border border-ghost-border/30 bg-black/30 p-4 hover:border-ghost-border/50 transition-colors">
+                        <p className="font-barlow font-bold text-white text-[11px] uppercase tracking-wider mb-3">
+                          {lobby.name}
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 text-ghost-gray-light text-xs font-barlow">
+                          {lobby.players.map(player => (
+                            <div key={player.id} className="rounded-lg bg-ghost-dark/80 px-3 py-2 truncate border border-ghost-border/20">
+                              {player.cod_username}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
