@@ -70,9 +70,15 @@ export default function AuthPage({ onNavigate }: AuthPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-ghost-black flex flex-col">
+    <div className="min-h-screen bg-ghost-black flex flex-col relative">
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-20"
+        style={{ backgroundImage: `url('/bacgroungimg.jpg')` }}
+      />
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-ghost-black/80 via-ghost-black/50 to-ghost-black/90" />
+
       {/* Top bar */}
-      <div className="bg-ghost-dark border-b border-ghost-border h-14 flex items-center px-6">
+      <div className="bg-ghost-dark border-b border-ghost-border h-14 flex items-center px-6 relative z-10">
         <button onClick={() => onNavigate('home')} className="flex items-center gap-2 group">
           <Crosshair size={20} className="text-ghost-gold" strokeWidth={1.5} />
           <span className="font-barlow font-black text-white text-base uppercase tracking-widest">
@@ -82,7 +88,7 @@ export default function AuthPage({ onNavigate }: AuthPageProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
+      <div className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
         <div className="w-full max-w-4xl">
           {/* Background decoration */}
           <div className="relative">
