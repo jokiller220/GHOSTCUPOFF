@@ -96,6 +96,30 @@ export default function AdminJoueursPage() {
     }
   }
 
+  async function autoQualifyTop16() {
+    if (!window.confirm('Voulez-vous vraiment qualifier automatiquement les 16 premiers du classement actuel et disqualifier les autres ?')) return;
+    setSaving(true);
+    setError('');
+    
+    // Set qualified = true for top 16, false for others in UI
+    const updatedLeaderboard = leaderboard.map((p, idx) => ({ ...p, qualified: idx < 16 }));
+    setLeaderboard(updatedLeaderboard);
+    
+    const top16Ids = updatedLeaderboard.filter(p => p.qualified).map(p => p.profile_id);
+    const othersIds = updatedLeaderboard.filter(p => !p.qualified).map(p => p.profile_id);
+
+    if (top16Ids.length > 0) {
+      await supabase.from('tournament_entries').update({ qualified: true }).in('profile_id', top16Ids);
+    }
+    if (othersIds.length > 0) {
+      await supabase.from('tournament_entries').update({ qualified: false }).in('profile_id', othersIds);
+    }
+    
+    setSuccess('Le top 16 a été qualifié automatiquement !');
+    setTimeout(() => setSuccess(''), 4000);
+    setSaving(false);
+  }
+
   const STATUS_COLORS: Record<string, string> = {
     forming: 'text-ghost-gray border-ghost-border',
     registered: 'text-ghost-gold border-ghost-gold/40',
@@ -290,9 +314,19 @@ export default function AdminJoueursPage() {
               <h3 className="font-barlow font-black text-ghost-gold uppercase">Gérer les qualifiés</h3>
               <p className="text-ghost-gray text-xs">Cochez les 16 meilleurs joueurs pour les qualifier au bracket 1v1.</p>
             </div>
-            <div className="text-center">
-              <span className="block font-barlow font-black text-2xl text-white">{leaderboard.filter(l => l.qualified).length} / 16</span>
-              <span className="text-ghost-gray text-[10px] uppercase tracking-widest">Qualifiés</span>
+            <div className="flex items-center gap-6">
+              <button
+                onClick={autoQualifyTop16}
+                disabled={saving}
+                className="btn-outline text-xs py-2 px-4 uppercase flex items-center gap-2 disabled:opacity-50"
+              >
+                <Crown size={12} className="text-ghost-gold" />
+                AUTOSÉLECTIONNER TOP 16
+              </button>
+              <div className="text-center border-l border-ghost-gold/20 pl-6">
+                <span className="block font-barlow font-black text-2xl text-white">{leaderboard.filter(l => l.qualified).length} / 16</span>
+                <span className="text-ghost-gray text-[10px] uppercase tracking-widest">Qualifiés</span>
+              </div>
             </div>
           </div>
           
