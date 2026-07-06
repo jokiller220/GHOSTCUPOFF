@@ -23,7 +23,7 @@ export default function PublicLayout({ children, currentPage, onNavigate }: Publ
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-ghost-black flex flex-col">
+    <div className="min-h-[100dvh] bg-ghost-black flex flex-col">
       {/* Top navbar */}
       <header className="sticky top-0 z-50 bg-ghost-dark/95 backdrop-blur border-b border-ghost-border">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-8">

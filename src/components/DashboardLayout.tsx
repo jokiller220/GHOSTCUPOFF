@@ -50,7 +50,7 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
   const currentLabel = playerLinks.find(l => l.page === currentPage)?.label ?? 'Dashboard';
 
   return (
-    <div className="min-h-screen bg-ghost-black flex">
+    <div className="min-h-[100dvh] bg-ghost-black flex">
 
       {/* === MOBILE OVERLAY === */}
       {sidebarOpen && (
@@ -171,7 +171,7 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
       </aside>
 
       {/* === MAIN CONTENT === */}
-      <div className="flex-1 lg:ml-52 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-52 flex flex-col min-h-[100dvh]">
 
         {/* Top bar — mobile hamburger + breadcrumb */}
         <header className="sticky top-0 z-30 bg-ghost-dark/95 backdrop-blur border-b border-ghost-border px-4 h-14 flex items-center justify-between">
@@ -199,7 +199,7 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 p-4 md:p-6 pb-24 lg:pb-6">
           {children}
         </main>
 
@@ -225,13 +225,6 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
           })}
         </nav>
       </div>
-
-      {/* Bottom padding on mobile to account for bottom nav */}
-      <style>{`
-        @media (max-width: 1023px) {
-          main { padding-bottom: 5rem !important; }
-        }
-      `}</style>
     </div>
   );
 }

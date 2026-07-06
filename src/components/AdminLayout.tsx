@@ -45,7 +45,7 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
   const currentLabel = adminLinks.find(l => l.page === currentPage)?.label ?? 'Tableau de Bord';
 
   return (
-    <div className="min-h-screen bg-ghost-black flex">
+    <div className="min-h-[100dvh] bg-ghost-black flex">
 
       {/* === MOBILE OVERLAY === */}
       {sidebarOpen && (
@@ -123,7 +123,7 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
       </aside>
 
       {/* === MAIN CONTENT === */}
-      <div className="flex-1 lg:ml-52 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-52 flex flex-col min-h-[100dvh]">
 
         {/* Top bar */}
         <header className="sticky top-0 z-30 bg-ghost-dark/95 backdrop-blur border-b border-ghost-border px-4 h-14 flex items-center justify-between">
