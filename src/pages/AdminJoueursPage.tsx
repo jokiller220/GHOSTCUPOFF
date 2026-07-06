@@ -4,10 +4,23 @@ import { supabase } from '../lib/supabase';
 import { Profile, Team, TeamStatus } from '../types';
 import { AdminTeamModal } from '../components/AdminTeamModal';
 
+interface LeaderboardEntry {
+  profile_id: string;
+  rank: number;
+  cod_username: string;
+  team_name: string;
+  team_pts: number;
+  solo_pts: number;
+  total_pts: number;
+  diff: string;
+  qualified: boolean;
+}
+
 export default function AdminJoueursPage() {
   const [players, setPlayers] = useState<Profile[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [tab, setTab] = useState<'players' | 'teams'>('players');
+  const [tab, setTab] = useState<'players' | 'teams' | 'leaderboard'>('players');
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState('');
@@ -28,7 +41,27 @@ export default function AdminJoueursPage() {
     
     setPlayers((playersData as Profile[]) ?? []);
 
-    if (tab === 'teams') {
+    if (tab === 'leaderboard') {
+      const { data } = await supabase
+        .from('tournament_entries')
+        .select('*, profile:profiles(cod_username), team:teams(name)')
+        .order('total_points', { ascending: false })
+        .order('team_points', { ascending: false })
+        .order('solo_points', { ascending: false });
+        
+      const entries = (data as any[] ?? []).map((entry, index) => ({
+        profile_id: entry.profile_id,
+        rank: index + 1,
+        cod_username: entry.profile?.cod_username ?? 'INCONNU',
+        team_name: entry.team?.name ?? 'Solo',
+        team_pts: entry.team_points ?? 0,
+        solo_pts: entry.solo_points ?? 0,
+        total_pts: entry.total_points ?? 0,
+        diff: entry.total_points != null ? `${entry.total_points - (entry.team_points ?? 0) - (entry.solo_points ?? 0)}` : '0',
+        qualified: entry.qualified ?? false,
+      }));
+      setLeaderboard(entries);
+    } else if (tab === 'teams') {
       const { data } = await supabase
         .from('teams')
         .select('*, captain:profiles(cod_username), members:team_members(*)')
@@ -51,6 +84,16 @@ export default function AdminJoueursPage() {
     if (!confirm('Promouvoir ce joueur en admin ?')) return;
     await supabase.from('profiles').update({ role: 'admin' }).eq('id', id);
     load();
+  }
+
+  async function toggleQualification(profile_id: string, currentState: boolean) {
+    const newState = !currentState;
+    setLeaderboard(prev => prev.map(p => p.profile_id === profile_id ? { ...p, qualified: newState } : p));
+    const { error } = await supabase.from('tournament_entries').update({ qualified: newState }).eq('profile_id', profile_id);
+    if (error) {
+      setError('Erreur lors de la qualification.');
+      setLeaderboard(prev => prev.map(p => p.profile_id === profile_id ? { ...p, qualified: currentState } : p));
+    }
   }
 
   const STATUS_COLORS: Record<string, string> = {
@@ -180,6 +223,7 @@ export default function AdminJoueursPage() {
         {[
           { key: 'players', label: `JOUEURS (${players.length})` },
           { key: 'teams', label: `ÉQUIPES (${teams.length})` },
+          { key: 'leaderboard', label: 'CLASSEMENT & QUALIFS' },
         ].map(({ key, label }) => (
           <button
             key={key}
@@ -238,6 +282,66 @@ export default function AdminJoueursPage() {
               <p className="font-barlow text-ghost-gray text-sm uppercase tracking-wider">Aucun joueur trouvé</p>
             </div>
           )}
+        </div>
+      ) : tab === 'leaderboard' ? (
+        <div className="space-y-4">
+          <div className="card p-4 flex items-center justify-between mb-4 bg-ghost-gold/10 border-ghost-gold/30">
+            <div>
+              <h3 className="font-barlow font-black text-ghost-gold uppercase">Gérer les qualifiés</h3>
+              <p className="text-ghost-gray text-xs">Cochez les 16 meilleurs joueurs pour les qualifier au bracket 1v1.</p>
+            </div>
+            <div className="text-center">
+              <span className="block font-barlow font-black text-2xl text-white">{leaderboard.filter(l => l.qualified).length} / 16</span>
+              <span className="text-ghost-gray text-[10px] uppercase tracking-widest">Qualifiés</span>
+            </div>
+          </div>
+          
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-ghost-gray uppercase bg-ghost-black/40 border-b border-ghost-border">
+                  <tr>
+                    <th className="px-4 py-3 text-center w-16">Rang</th>
+                    <th className="px-4 py-3">Joueur</th>
+                    <th className="px-4 py-3 text-center">Pts Équipe</th>
+                    <th className="px-4 py-3 text-center">Pts Solo</th>
+                    <th className="px-4 py-3 text-center font-bold text-ghost-gold">Total</th>
+                    <th className="px-4 py-3 text-center w-24">Qualifié</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ghost-border">
+                  {leaderboard.map(player => (
+                    <tr key={player.profile_id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-4 py-3 text-center font-barlow font-black">
+                        <span className={`flex items-center justify-center w-6 h-6 mx-auto rounded-full ${player.rank <= 16 ? 'bg-ghost-gold text-black' : 'bg-ghost-dark text-ghost-gray'}`}>
+                          {player.rank}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="font-barlow font-bold text-white">{player.cod_username}</p>
+                        <p className="text-[10px] text-ghost-gray">{player.team_name}</p>
+                      </td>
+                      <td className="px-4 py-3 text-center text-ghost-gray">{player.team_pts}</td>
+                      <td className="px-4 py-3 text-center text-ghost-gray">{player.solo_pts}</td>
+                      <td className="px-4 py-3 text-center font-barlow font-bold text-ghost-gold">{player.total_pts}</td>
+                      <td className="px-4 py-3 text-center">
+                        <button 
+                          onClick={() => toggleQualification(player.profile_id, player.qualified)}
+                          className={`w-6 h-6 rounded border flex items-center justify-center mx-auto transition-colors ${player.qualified ? 'bg-ghost-gold border-ghost-gold text-black' : 'border-ghost-border hover:border-ghost-gold/50'}`}
+                        >
+                          {player.qualified && (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          )}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="space-y-2">
