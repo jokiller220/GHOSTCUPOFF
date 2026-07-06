@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-color: #0a0a0a;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  input, textarea, button, select {
+    -webkit-user-select: text;
+    user-select: text;
+    font-size: 16px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #111111;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c9a227;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    @apply bg-ghost-gold hover:bg-ghost-gold-light text-black font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-md;
+  }
+
+  .btn-outline {
+    @apply border border-ghost-border hover:border-ghost-gold text-ghost-gray-light hover:text-ghost-gold font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-md;
+  }
+
+  .btn-red {
+    @apply bg-ghost-red hover:bg-ghost-red-light text-white font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-md;
+  }
+
+  .btn-dark {
+    @apply bg-ghost-card border border-ghost-border hover:border-ghost-gold text-white font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-md;
+  }
+
+  .card {
+    @apply bg-ghost-card border border-ghost-border;
+  }
+
+  .input-dark {
+    @apply w-full bg-[#0d0d0d] border border-ghost-border text-white placeholder-ghost-gray px-4 py-3 text-sm focus:outline-none focus:border-ghost-gold transition-colors duration-200;
+    font-size: 16px;
+  }
+
+  .nav-link {
+    @apply font-barlow font-bold uppercase tracking-wider text-sm text-ghost-gray hover:text-white transition-colors duration-200;
+  }
+
+  .nav-link-active {
+    @apply font-barlow font-bold uppercase tracking-wider text-sm text-ghost-gold;
+  }
+
+  .section-title {
+    @apply font-barlow font-black uppercase tracking-widest text-ghost-gold text-xs border-b border-ghost-border pb-2 mb-4;
+  }
+
+  .gold-divider {
+    @apply w-16 h-0.5 bg-ghost-gold mx-auto my-4;
+  }
+
+  .status-badge {
+    @apply text-xs font-barlow font-bold uppercase tracking-wider px-2 py-0.5;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 text-ghost-gray hover:text-white hover:bg-white/5 transition-all duration-200 font-barlow font-bold uppercase tracking-wider text-sm border-l-2 border-transparent;
+  }
+
+  .sidebar-link-active {
+    @apply flex items-center gap-3 px-4 py-3 text-ghost-gold bg-ghost-gold/5 border-l-2 border-ghost-gold font-barlow font-bold uppercase tracking-wider text-sm;
+  }
+}
+
+@layer utilities {
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #c9a227 0%, #e2b93b 50%, #9a7a1a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .border-gold-glow {
+    box-shadow: 0 0 20px rgba(201, 162, 39, 0.15), inset 0 0 20px rgba(201, 162, 39, 0.05);
+  }
+
+  .live-indicator {
+    animation: pulse-live 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
