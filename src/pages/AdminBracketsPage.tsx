@@ -156,8 +156,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
       .from('profiles')
       .select('id, cod_username, team_members(team_id, status)')
       .eq('role', 'player')
-      .order('created_at', { ascending: true })
-      .limit(24);
+      .order('created_at', { ascending: true });
 
     const players = (data as any[] | null) ?? [];
     if (playerError || players.length < 2) {
