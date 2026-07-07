@@ -23,7 +23,16 @@ export default function PublicLayout({ children, currentPage, onNavigate }: Publ
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] bg-ghost-black flex flex-col">
+    <div className="min-h-[100dvh] bg-ghost-black flex flex-col relative">
+      {/* Global Background Image */}
+      <div 
+        className="fixed inset-0 opacity-40 pointer-events-none z-0 mix-blend-lighten"
+        style={{
+          backgroundImage: `url("/bacgroungimg.jpg")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
       {/* Top navbar */}
       <header className="sticky top-0 z-50 bg-ghost-dark/95 backdrop-blur border-b border-ghost-border">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-8">
@@ -119,7 +128,7 @@ export default function PublicLayout({ children, currentPage, onNavigate }: Publ
       {currentPage !== 'home' ? (
         <div className="flex flex-1">
           {/* Left sidebar for public pages */}
-          <aside className="hidden lg:flex flex-col w-48 bg-ghost-dark border-r border-ghost-border shrink-0">
+          <aside className="hidden lg:flex flex-col w-48 bg-ghost-dark/80 backdrop-blur-md border-r border-ghost-border/50 shrink-0 relative z-20">
             <div className="p-6">
               <Logo onNavigate={onNavigate} size="sm" />
             </div>
@@ -144,12 +153,12 @@ export default function PublicLayout({ children, currentPage, onNavigate }: Publ
             </nav>
           </aside>
 
-          <main className="flex-1">
+          <main className="flex-1 w-full relative z-10">
             {children}
           </main>
         </div>
       ) : (
-        <main className="flex-1">
+        <main className="flex-1 w-full relative z-10">
           {children}
         </main>
       )}

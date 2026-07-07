@@ -141,16 +141,6 @@ export default function Home({ onNavigate }: HomeProps) {
           background: 'linear-gradient(135deg, #0a0a0a 0%, #111111 40%, #0f0c08 100%)',
         }}
       >
-        {/* Background image overlay */}
-        <div
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage: `url("/bacgroungimg.jpg")`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'brightness(0.8) contrast(120%)',
-          }}
-        />
         {/* Gold vignette */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-ghost-black" />
         <div
