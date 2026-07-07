@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RefreshCw, Save, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { RefreshCw, Save, Calendar as CalendarIcon, Clock, Edit2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateBracketMatches, generateRoundRobinSchedule, generateSoloLobbyRounds, SoloLobbyRound, formatScheduledAt } from '../lib/tournament';
 import { ScheduleConfig } from '../types';
@@ -8,6 +8,7 @@ export default function AdminPlanningPage() {
   const [configs, setConfigs] = useState<ScheduleConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [message, setMessage] = useState('');
 
   const [rrDates, setRrDates] = useState<{ date: string; time: string }[]>([]);
@@ -40,6 +41,7 @@ export default function AdminPlanningPage() {
       if (bracket) setBracketDates(bracket.config.dates || []);
     }
     setLoading(false);
+    setIsEditing(false);
   }
 
   async function save() {
@@ -68,6 +70,7 @@ export default function AdminPlanningPage() {
     setMessage('Horaires enregistrés et matchs mis à jour.');
     setTimeout(() => setMessage(''), 3000);
     setSaving(false);
+    setIsEditing(false);
   }
 
   return (
@@ -81,9 +84,15 @@ export default function AdminPlanningPage() {
           <button onClick={load} className="btn-outline text-xs py-2 px-4 flex items-center gap-2">
             <RefreshCw size={12} /> ACTUALISER
           </button>
-          <button onClick={save} disabled={saving} className="btn-gold text-xs py-2 px-4 flex items-center gap-2 disabled:opacity-50">
-            <Save size={12} /> ENREGISTRER
-          </button>
+          {!isEditing ? (
+            <button onClick={() => setIsEditing(true)} className="btn-outline text-xs py-2 px-4 flex items-center gap-2">
+              <Edit2 size={12} /> MODIFIER
+            </button>
+          ) : (
+            <button onClick={save} disabled={saving} className="btn-gold text-xs py-2 px-4 flex items-center gap-2 disabled:opacity-50">
+              <Save size={12} /> ENREGISTRER
+            </button>
+          )}
         </div>
       </div>
       
