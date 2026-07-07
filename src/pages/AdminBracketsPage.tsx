@@ -10,7 +10,8 @@ interface AdminBracketsPageProps {
 }
 
 export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps) {
-  const [format, setFormat] = useState<Format>('4v4');
+  type BracketTab = '4v4' | '1v1_lobbys' | '1v1_bracket';
+  const [activeTab, setActiveTab] = useState<BracketTab>('4v4');
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
@@ -21,10 +22,11 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
 
   async function load() {
     setLoading(true);
+    const formatFilter: Format = activeTab === '4v4' ? '4v4' : '1v1';
     const { data } = await supabase
       .from('matches')
       .select('*, scores:match_scores(*)')
-      .eq('format', format)
+      .eq('format', formatFilter)
       .order('round_order')
       .order('match_order');
     setMatches((data as Match[]) ?? []);
@@ -235,7 +237,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, [format]);
+  useEffect(() => { load(); }, [activeTab]);
 
   return (
     <div className="animate-slide-up">
@@ -267,112 +269,125 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
           )}
         </div>
       )}
-      <div className="flex flex-wrap gap-3 mb-6">
-        {format === '4v4' ? (
-          <button onClick={createRoundRobinSchedule} className="btn-gold text-xs py-2 px-4 uppercase tracking-widest">
-            Générer round robin 4v4
-          </button>
-        ) : (
-          <button onClick={createBracketMatches} className="btn-gold text-xs py-2 px-4 uppercase tracking-widest">
-            Générer bracket 1v1
-          </button>
-        )}
-        <button onClick={previewSoloLobbies} className={`btn-outline text-xs py-2 px-4 uppercase tracking-widest ${lobbiesSaved ? 'border-ghost-red/50 text-ghost-red hover:bg-ghost-red/10' : ''}`}>
-          {lobbiesSaved ? 'Regénérer lobbys solo' : 'Prévisualiser lobbys solo'}
-        </button>
-      </div>
-
-      {soloLobbyRounds && (
-        <div className="mb-6 space-y-4">
-          <div className="rounded-3xl border border-ghost-border p-4 bg-ghost-card/80">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <p className="font-barlow font-black text-white uppercase text-xs tracking-widest">Aperçu des lobbys solo</p>
-                <button 
-                  onClick={() => setShowSoloPreview(!showSoloPreview)} 
-                  className="text-ghost-gray hover:text-white transition-colors flex items-center gap-1 text-[10px] font-barlow uppercase tracking-wider"
-                >
-                  {showSoloPreview ? <><EyeOff size={12} /> Masquer</> : <><Eye size={12} /> Afficher</>}
-                </button>
-              </div>
-              {lobbiesSaved ? (
-                <span className="text-ghost-green font-barlow font-bold text-xs flex items-center gap-1">
-                  <CheckCircle size={14} /> ENREGISTRÉ
-                </span>
-              ) : (
-                <button 
-                  onClick={saveSoloLobbies}
-                  className="bg-ghost-gold text-black hover:bg-white font-barlow font-bold text-[10px] uppercase tracking-widest px-4 py-2 rounded transition-colors"
-                >
-                  ENREGISTRER LES LOBBYS
-                </button>
-              )}
-            </div>
-            
-            {showSoloPreview && (
-              <div className="grid gap-3 md:grid-cols-2">
-                {soloLobbyRounds.map((round) => (
-                  <div key={round.round} className="rounded-2xl border border-ghost-border/50 bg-ghost-dark p-3">
-                    <p className="font-barlow font-bold text-ghost-gold uppercase text-[11px] tracking-[0.25em] mb-3">Partie {round.round}</p>
-                    <div className="space-y-2">
-                      {round.lobbies.map((lobby) => (
-                        <div key={lobby.name} className="rounded-2xl border border-ghost-border/30 bg-black/20 p-3">
-                          <p className="text-ghost-gray text-[10px] uppercase tracking-wider mb-2">{lobby.name}</p>
-                          <div className="grid grid-cols-2 gap-2 text-white text-xs font-barlow">
-                            {lobby.players.map((player) => (
-                              <div key={player.id} className="rounded-lg bg-ghost-black/70 p-2 truncate">{player.name}</div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-          </div>
-        </div>
-      )}
-
       {/* Format tabs */}
       <div className="flex border-b border-ghost-border mb-6 overflow-x-auto whitespace-nowrap hide-scrollbar">
-        {(['4v4', '1v1'] as Format[]).map(f => (
+        {[
+          { id: '4v4', label: '4V4' },
+          { id: '1v1_lobbys', label: '1V1 PHASE 1 (LOBBYS)' },
+          { id: '1v1_bracket', label: '1V1 PHASE 2 (BRACKET)' },
+        ].map(t => (
           <button
-            key={f}
-            onClick={() => setFormat(f)}
+            key={t.id}
+            onClick={() => setActiveTab(t.id as BracketTab)}
             className={`px-8 py-3 font-barlow font-black text-xs uppercase tracking-widest border-b-2 transition-all ${
-              format === f ? 'text-ghost-gold border-ghost-gold' : 'text-ghost-gray border-transparent hover:text-white'
+              activeTab === t.id ? 'text-ghost-gold border-ghost-gold' : 'text-ghost-gray border-transparent hover:text-white'
             }`}
           >
-            {f}
+            {t.label}
           </button>
         ))}
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center h-48 gap-3 text-ghost-gray">
-          <RefreshCw size={16} className="animate-spin" />
-        </div>
-      ) : matches.length === 0 ? (
-        <div className="card p-12 text-center">
-          <GitBranch size={32} className="mx-auto mb-3 text-ghost-gray/30" />
-          <p className="font-barlow text-ghost-gray text-sm uppercase tracking-wider mb-4">Aucun bracket généré</p>
-        </div>
+      <div className="flex flex-wrap gap-3 mb-6">
+        {activeTab === '4v4' && (
+          <button onClick={createRoundRobinSchedule} className="btn-gold text-xs py-2 px-4 uppercase tracking-widest">
+            Générer round robin 4v4
+          </button>
+        )}
+        {activeTab === '1v1_bracket' && (
+          <button onClick={createBracketMatches} className="btn-gold text-xs py-2 px-4 uppercase tracking-widest">
+            Générer bracket 1v1
+          </button>
+        )}
+        {activeTab === '1v1_lobbys' && (
+          <button onClick={previewSoloLobbies} className={`btn-outline text-xs py-2 px-4 uppercase tracking-widest ${lobbiesSaved ? 'border-ghost-red/50 text-ghost-red hover:bg-ghost-red/10' : ''}`}>
+            {lobbiesSaved ? 'Regénérer lobbys solo' : 'Prévisualiser lobbys solo'}
+          </button>
+        )}
+      </div>
+
+      {activeTab === '1v1_lobbys' ? (
+        soloLobbyRounds ? (
+          <div className="mb-6 space-y-4">
+            <div className="rounded-3xl border border-ghost-border p-4 bg-ghost-card/80">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <p className="font-barlow font-black text-white uppercase text-xs tracking-widest">Aperçu des lobbys solo</p>
+                  <button 
+                    onClick={() => setShowSoloPreview(!showSoloPreview)} 
+                    className="text-ghost-gray hover:text-white transition-colors flex items-center gap-1 text-[10px] font-barlow uppercase tracking-wider"
+                  >
+                    {showSoloPreview ? <><EyeOff size={12} /> Masquer</> : <><Eye size={12} /> Afficher</>}
+                  </button>
+                </div>
+                {lobbiesSaved ? (
+                  <span className="text-ghost-green font-barlow font-bold text-xs flex items-center gap-1">
+                    <CheckCircle size={14} /> ENREGISTRÉ
+                  </span>
+                ) : (
+                  <button 
+                    onClick={saveSoloLobbies}
+                    className="bg-ghost-gold text-black hover:bg-white font-barlow font-bold text-[10px] uppercase tracking-widest px-4 py-2 rounded transition-colors"
+                  >
+                    ENREGISTRER LES LOBBYS
+                  </button>
+                )}
+              </div>
+              
+              {showSoloPreview && (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {soloLobbyRounds.map((round) => (
+                    <div key={round.round} className="rounded-2xl border border-ghost-border/50 bg-ghost-dark p-3">
+                      <p className="font-barlow font-bold text-ghost-gold uppercase text-[11px] tracking-[0.25em] mb-3">Partie {round.round}</p>
+                      <div className="space-y-2">
+                        {round.lobbies.map((lobby) => (
+                          <div key={lobby.name} className="rounded-2xl border border-ghost-border/30 bg-black/20 p-3">
+                            <p className="text-ghost-gray text-[10px] uppercase tracking-wider mb-2">{lobby.name}</p>
+                            <div className="grid grid-cols-2 gap-2 text-white text-xs font-barlow">
+                              {lobby.players.map((player) => (
+                                <div key={player.id} className="rounded-lg bg-ghost-black/70 p-2 truncate">{player.name}</div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="card p-12 text-center">
+            <GitBranch size={32} className="mx-auto mb-3 text-ghost-gray/30" />
+            <p className="font-barlow text-ghost-gray text-sm uppercase tracking-wider mb-4">Aucun lobby généré</p>
+          </div>
+        )
       ) : (
-        <div className="card p-6 w-full max-w-full overflow-hidden">
-          <div className="text-right mb-2 flex items-center justify-end gap-2 text-ghost-gold/70 text-[10px] uppercase tracking-widest font-barlow">
-            <span>Faites défiler horizontalement</span>
-            <span className="animate-pulse">👉</span>
+        loading ? (
+          <div className="flex items-center justify-center h-48 gap-3 text-ghost-gray">
+            <RefreshCw size={16} className="animate-spin" />
           </div>
-          <div className="overflow-x-auto custom-scrollbar pb-4 w-full">
-            <BracketTree
-              matches={matches}
-              onMatchClick={m => onNavigate('admin-match-detail', m.id)}
-              format={format}
-            />
+        ) : matches.length === 0 ? (
+          <div className="card p-12 text-center">
+            <GitBranch size={32} className="mx-auto mb-3 text-ghost-gray/30" />
+            <p className="font-barlow text-ghost-gray text-sm uppercase tracking-wider mb-4">Aucun bracket généré</p>
           </div>
-        </div>
+        ) : (
+          <div className="card p-6 w-full max-w-full overflow-hidden">
+            <div className="text-right mb-2 flex items-center justify-end gap-2 text-ghost-gold/70 text-[10px] uppercase tracking-widest font-barlow">
+              <span>Faites défiler horizontalement</span>
+              <span className="animate-pulse">👉</span>
+            </div>
+            <div className="overflow-x-auto custom-scrollbar pb-4 w-full">
+              <BracketTree
+                matches={matches}
+                onMatchClick={m => onNavigate('admin-match-detail', m.id)}
+                format={activeTab === '4v4' ? '4v4' : '1v1'}
+              />
+            </div>
+          </div>
+        )
       )}
     </div>
   );
