@@ -38,8 +38,14 @@ export default function AdminJoueursPage() {
       .select('*')
       .eq('role', 'player')
       .order('created_at', { ascending: false });
-    
     setPlayers((playersData as Profile[]) ?? []);
+
+    // We always need teams so the tab shows the correct count
+    const { data: teamsData } = await supabase
+      .from('teams')
+      .select('*, captain:profiles(cod_username), members:team_members(*)')
+      .order('created_at', { ascending: false });
+    setTeams((teamsData as Team[]) ?? []);
 
     if (tab === 'leaderboard') {
       const { data } = await supabase
@@ -61,12 +67,6 @@ export default function AdminJoueursPage() {
         qualified: entry.qualified ?? false,
       }));
       setLeaderboard(entries);
-    } else if (tab === 'teams') {
-      const { data } = await supabase
-        .from('teams')
-        .select('*, captain:profiles(cod_username), members:team_members(*)')
-        .order('created_at', { ascending: false });
-      setTeams((data as Team[]) ?? []);
     }
     setLoading(false);
   }
