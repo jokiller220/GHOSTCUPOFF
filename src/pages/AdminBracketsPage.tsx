@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { RefreshCw, GitBranch, CheckCircle } from 'lucide-react';
+import { RefreshCw, GitBranch, CheckCircle, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateBracketMatches, generateRoundRobinSchedule, generateSoloLobbyRounds, SoloLobbyRound } from '../lib/tournament';
 import { Match, Format, Page } from '../types';
@@ -17,6 +17,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
   const [error, setError] = useState<string | null>(null);
   const [soloLobbyRounds, setSoloLobbyRounds] = useState<SoloLobbyRound[] | null>(null);
   const [lobbiesSaved, setLobbiesSaved] = useState(false);
+  const [showSoloPreview, setShowSoloPreview] = useState(true);
 
   async function load() {
     setLoading(true);
@@ -285,7 +286,15 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
         <div className="mb-6 space-y-4">
           <div className="rounded-3xl border border-ghost-border p-4 bg-ghost-card/80">
             <div className="flex items-center justify-between mb-4">
-              <p className="font-barlow font-black text-white uppercase text-xs tracking-widest">Aperçu des lobbys solo</p>
+              <div className="flex items-center gap-3">
+                <p className="font-barlow font-black text-white uppercase text-xs tracking-widest">Aperçu des lobbys solo</p>
+                <button 
+                  onClick={() => setShowSoloPreview(!showSoloPreview)} 
+                  className="text-ghost-gray hover:text-white transition-colors flex items-center gap-1 text-[10px] font-barlow uppercase tracking-wider"
+                >
+                  {showSoloPreview ? <><EyeOff size={12} /> Masquer</> : <><Eye size={12} /> Afficher</>}
+                </button>
+              </div>
               {lobbiesSaved ? (
                 <span className="text-ghost-green font-barlow font-bold text-xs flex items-center gap-1">
                   <CheckCircle size={14} /> ENREGISTRÉ
@@ -299,25 +308,29 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
                 </button>
               )}
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              {soloLobbyRounds.map((round) => (
-                <div key={round.round} className="rounded-2xl border border-ghost-border/50 bg-ghost-dark p-3">
-                  <p className="font-barlow font-bold text-ghost-gold uppercase text-[11px] tracking-[0.25em] mb-3">Partie {round.round}</p>
-                  <div className="space-y-2">
-                    {round.lobbies.map((lobby) => (
-                      <div key={lobby.name} className="rounded-2xl border border-ghost-border/30 bg-black/20 p-3">
-                        <p className="text-ghost-gray text-[10px] uppercase tracking-wider mb-2">{lobby.name}</p>
-                        <div className="grid grid-cols-2 gap-2 text-white text-xs font-barlow">
-                          {lobby.players.map((player) => (
-                            <div key={player.id} className="rounded-lg bg-ghost-black/70 p-2 truncate">{player.name}</div>
-                          ))}
+            
+            {showSoloPreview && (
+              <div className="grid gap-3 md:grid-cols-2">
+                {soloLobbyRounds.map((round) => (
+                  <div key={round.round} className="rounded-2xl border border-ghost-border/50 bg-ghost-dark p-3">
+                    <p className="font-barlow font-bold text-ghost-gold uppercase text-[11px] tracking-[0.25em] mb-3">Partie {round.round}</p>
+                    <div className="space-y-2">
+                      {round.lobbies.map((lobby) => (
+                        <div key={lobby.name} className="rounded-2xl border border-ghost-border/30 bg-black/20 p-3">
+                          <p className="text-ghost-gray text-[10px] uppercase tracking-wider mb-2">{lobby.name}</p>
+                          <div className="grid grid-cols-2 gap-2 text-white text-xs font-barlow">
+                            {lobby.players.map((player) => (
+                              <div key={player.id} className="rounded-lg bg-ghost-black/70 p-2 truncate">{player.name}</div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
           </div>
         </div>
       )}
