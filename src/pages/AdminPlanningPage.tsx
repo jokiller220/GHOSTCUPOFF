@@ -15,6 +15,29 @@ export default function AdminPlanningPage() {
   const [ffaDates, setFfaDates] = useState<{ date: string; time: string }[]>([]);
   const [bracketDates, setBracketDates] = useState<{ date: string; times: string[] }[]>([]);
 
+  function getHelperText(date: string, time: string) {
+    if (!date || !time) return null;
+    const timeStr = time.length === 5 ? `${time}:00` : time;
+    const d = new Date(`${date}T${timeStr}`);
+    if (isNaN(d.getTime())) return null;
+    const frTime = d.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' });
+    return `(${frTime} FR)`;
+  }
+
+  function getBracketHelperText(date: string, times: string[]) {
+    if (!date || !times || times.length === 0) return null;
+    const frTimes = times.map(time => {
+      const t = time.trim();
+      if (!t) return '';
+      const timeStr = t.length === 5 ? `${t}:00` : t;
+      const d = new Date(`${date}T${timeStr}`);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' });
+    }).filter(Boolean);
+    if (frTimes.length === 0) return null;
+    return `(${frTimes.join(', ')} FR)`;
+  }
+
   useEffect(() => {
     load();
   }, []);
@@ -176,16 +199,24 @@ export default function AdminPlanningPage() {
                     }}
                     className="input-dark flex-1" 
                   />
-                  <input 
-                    type="time" 
-                    value={item.time} 
-                    onChange={e => {
-                      const newDates = [...rrDates];
-                      newDates[i].time = e.target.value;
-                      setRrDates(newDates);
-                    }}
-                    className="input-dark flex-1" 
-                  />
+                  <div className="flex-1 flex flex-col gap-1">
+                    <input 
+                      type="time" 
+                      value={item.time} 
+                      onChange={e => {
+                        const newDates = [...rrDates];
+                        newDates[i].time = e.target.value;
+                        setRrDates(newDates);
+                      }}
+                      disabled={!isEditing}
+                      className="input-dark w-full disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    {getHelperText(item.date, item.time) && (
+                      <span className="text-[10px] text-ghost-gray font-barlow italic">
+                        {getHelperText(item.date, item.time)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -212,16 +243,24 @@ export default function AdminPlanningPage() {
                     }}
                     className="input-dark flex-1" 
                   />
-                  <input 
-                    type="time" 
-                    value={item.time} 
-                    onChange={e => {
-                      const newDates = [...ffaDates];
-                      newDates[i].time = e.target.value;
-                      setFfaDates(newDates);
-                    }}
-                    className="input-dark flex-1" 
-                  />
+                  <div className="flex-1 flex flex-col gap-1">
+                    <input 
+                      type="time" 
+                      value={item.time} 
+                      onChange={e => {
+                        const newDates = [...ffaDates];
+                        newDates[i].time = e.target.value;
+                        setFfaDates(newDates);
+                      }}
+                      disabled={!isEditing}
+                      className="input-dark w-full disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    {getHelperText(item.date, item.time) && (
+                      <span className="text-[10px] text-ghost-gray font-barlow italic">
+                        {getHelperText(item.date, item.time)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -251,17 +290,25 @@ export default function AdminPlanningPage() {
                         }}
                         className="input-dark" 
                       />
-                      <input 
-                        type="text" 
-                        value={bracketDates[i].times.join(', ')} 
-                        onChange={e => {
-                          const newDates = [...bracketDates];
-                          newDates[i].times = e.target.value.split(',').map(t => t.trim());
-                          setBracketDates(newDates);
-                        }}
-                        placeholder="Ex: 18:00, 19:30"
-                        className="input-dark flex-1 min-w-[200px]" 
-                      />
+                      <div className="flex-1 flex flex-col gap-1">
+                        <input 
+                          type="text" 
+                          value={bracketDates[i].times.join(', ')} 
+                          onChange={e => {
+                            const newDates = [...bracketDates];
+                            newDates[i].times = e.target.value.split(',').map(t => t.trim());
+                            setBracketDates(newDates);
+                          }}
+                          placeholder="Ex: 18:00, 19:30"
+                          disabled={!isEditing}
+                          className="input-dark w-full disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px]" 
+                        />
+                        {getBracketHelperText(bracketDates[i].date, bracketDates[i].times) && (
+                          <span className="text-[10px] text-ghost-gray font-barlow italic">
+                            {getBracketHelperText(bracketDates[i].date, bracketDates[i].times)}
+                          </span>
+                        )}
+                      </div>
                     </>
                   )}
                 </div>
