@@ -156,7 +156,7 @@ export default function MesMatchsPage({ onNavigate }: MesMatchsPageProps) {
           <div className="card p-12 text-center">
             <Clock size={32} className="mx-auto mb-3 text-ghost-gray/30" />
             <p className="font-barlow text-ghost-gray text-sm uppercase tracking-wider">Aucun match d'équipe</p>
-            <p className="text-ghost-gray/50 text-xs mt-2">4 matchs en poule (BO3) à venir</p>
+            <p className="text-ghost-gray/50 text-xs mt-2">5 matchs de poule (BO3) à venir</p>
           </div>
         ) : (
           <div className="space-y-3">
