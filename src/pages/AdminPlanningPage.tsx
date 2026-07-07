@@ -59,8 +59,54 @@ export default function AdminPlanningPage() {
       { type: 'bracket', config: bracketConfig }
     ], { onConflict: 'type' });
 
-    // We only save the configuration. We DO NOT automatically update existing matches
-    // because the admin may have customized individual match times in the DB.
+    // Update RR matches
+    for (let i = 0; i < rrDates.length; i++) {
+        const d = rrDates[i];
+        if (!d.date || !d.time) continue;
+        await supabase.from('matches')
+            .update({ scheduled_at: formatScheduledAt(d.date, d.time) })
+            .eq('format', '4v4')
+            .eq('round_order', i + 1);
+    }
+    
+    // Update Bracket matches
+    if (bracketDates[0]) {
+        for (let i = 0; i < 8; i++) {
+            const time = bracketDates[0].times[i] || bracketDates[0].times[0] || '18:00';
+            await supabase.from('matches')
+                .update({ scheduled_at: formatScheduledAt(bracketDates[0].date, time) })
+                .eq('format', '1v1')
+                .eq('round_order', 1)
+                .eq('match_order', i + 1);
+        }
+    }
+    if (bracketDates[1]) {
+        for (let i = 0; i < 4; i++) {
+            const time = bracketDates[1].times[i] || bracketDates[1].times[0] || '18:00';
+            await supabase.from('matches')
+                .update({ scheduled_at: formatScheduledAt(bracketDates[1].date, time) })
+                .eq('format', '1v1')
+                .eq('round_order', 2)
+                .eq('match_order', i + 1);
+        }
+    }
+    if (bracketDates[2]) {
+        for (let i = 0; i < 2; i++) {
+            const time = bracketDates[2].times[i] || bracketDates[2].times[0] || '18:00';
+            await supabase.from('matches')
+                .update({ scheduled_at: formatScheduledAt(bracketDates[2].date, time) })
+                .eq('format', '1v1')
+                .eq('round_order', 3)
+                .eq('match_order', i + 1);
+        }
+    }
+    if (bracketDates[3]) {
+        const time = bracketDates[3].times[0] || '18:00';
+        await supabase.from('matches')
+            .update({ scheduled_at: formatScheduledAt(bracketDates[3].date, time) })
+            .eq('format', '1v1')
+            .eq('round_order', 4);
+    }
 
     await supabase.from('activity_logs').insert({
         action: 'schedule_updated',
