@@ -214,7 +214,7 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
         </main>
 
         {/* === BOTTOM NAV (mobile only) === */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-ghost-dark border-t border-ghost-border flex justify-around py-1 px-2">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-ghost-dark border-t border-ghost-border flex justify-around pt-2 pb-[calc(env(safe-area-inset-bottom)+8px)] px-2">
           {playerLinks.slice(0, 4).map(({ label, page, icon }) => {
             // Clean up labels for mobile (e.g. "Mes Matchs" -> "Matchs")
             const mobileLabel = label.replace('Mes ', '').replace('Mon ', '');
