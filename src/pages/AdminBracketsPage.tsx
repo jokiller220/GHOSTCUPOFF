@@ -41,6 +41,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
   }
 
   async function advanceBracketPhase() {
+    if (!window.confirm("Êtes-vous sûr de vouloir forcer l'avancement du bracket ? Cette action est irréversible.")) return;
     setLoading(true);
     setMessage(null);
     setError(null);
@@ -59,6 +60,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
   }
 
   async function createRoundRobinSchedule() {
+    if (!window.confirm("Voulez-vous vraiment générer le planning Round Robin 4v4 ? S'il a déjà été généré, cela risque de créer des doublons !")) return;
     setLoading(true);
     setMessage(null);
     setError(null);
@@ -105,6 +107,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
   }
 
   async function createBracketMatches() {
+    if (!window.confirm("Voulez-vous vraiment générer le bracket final 1v1 ? S'il a déjà été généré, cela risque de créer des doublons !")) return;
     setLoading(true);
     setMessage(null);
     setError(null);
@@ -192,6 +195,7 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
 
   async function saveSoloLobbies() {
     if (!soloLobbyRounds) return;
+    if (!window.confirm("Voulez-vous vraiment enregistrer et publier ces lobbys FFA ?")) return;
     setLoading(true);
     setMessage(null);
     setError(null);
