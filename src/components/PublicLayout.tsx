@@ -144,7 +144,7 @@ export default function PublicLayout({ children, currentPage, onNavigate }: Publ
             </nav>
           </aside>
 
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1">
             {children}
           </main>
         </div>
