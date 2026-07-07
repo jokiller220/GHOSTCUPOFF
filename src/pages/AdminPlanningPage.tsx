@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw, Save, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { generateBracketMatches, generateRoundRobinSchedule, generateSoloLobbyRounds, SoloLobbyRound, formatScheduledAt } from '../lib/tournament';
 import { ScheduleConfig } from '../types';
 
 export default function AdminPlanningPage() {
@@ -66,7 +67,7 @@ export default function AdminPlanningPage() {
         const d = rrDates[i];
         if (!d.date || !d.time) continue;
         await supabase.from('matches')
-            .update({ scheduled_at: `${d.date}T${d.time}` })
+            .update({ scheduled_at: formatScheduledAt(d.date, d.time) })
             .eq('format', '4v4')
             .eq('round_order', i + 1);
     }
@@ -78,7 +79,7 @@ export default function AdminPlanningPage() {
         for (let i = 0; i < 8; i++) {
             const time = bracketDates[0].times[i] || bracketDates[0].times[0] || '18:00';
             await supabase.from('matches')
-                .update({ scheduled_at: `${bracketDates[0].date}T${time}` })
+                .update({ scheduled_at: formatScheduledAt(bracketDates[0].date, time) })
                 .eq('format', '1v1')
                 .eq('round_order', 1)
                 .eq('match_order', i + 1);
@@ -88,7 +89,7 @@ export default function AdminPlanningPage() {
         for (let i = 0; i < 4; i++) {
             const time = bracketDates[1].times[i] || bracketDates[1].times[0] || '18:00';
             await supabase.from('matches')
-                .update({ scheduled_at: `${bracketDates[1].date}T${time}` })
+                .update({ scheduled_at: formatScheduledAt(bracketDates[1].date, time) })
                 .eq('format', '1v1')
                 .eq('round_order', 2)
                 .eq('match_order', i + 1);
@@ -98,7 +99,7 @@ export default function AdminPlanningPage() {
         for (let i = 0; i < 2; i++) {
             const time = bracketDates[2].times[i] || bracketDates[2].times[0] || '18:00';
             await supabase.from('matches')
-                .update({ scheduled_at: `${bracketDates[2].date}T${time}` })
+                .update({ scheduled_at: formatScheduledAt(bracketDates[2].date, time) })
                 .eq('format', '1v1')
                 .eq('round_order', 3)
                 .eq('match_order', i + 1);
@@ -107,7 +108,7 @@ export default function AdminPlanningPage() {
     if (bracketDates[3]) {
         const time = bracketDates[3].times[0] || '18:00';
         await supabase.from('matches')
-            .update({ scheduled_at: `${bracketDates[3].date}T${time}` })
+            .update({ scheduled_at: formatScheduledAt(bracketDates[3].date, time) })
             .eq('format', '1v1')
             .eq('round_order', 4);
     }
