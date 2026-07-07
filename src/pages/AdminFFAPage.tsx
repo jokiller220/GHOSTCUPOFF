@@ -139,7 +139,12 @@ export default function AdminFFAPage() {
           )}
 
           {/* Grille de sélection des lobbys */}
-          {lobbies.length > 0 && (
+          {lobbies.length === 0 && !loading ? (
+            <div className="text-center py-12 border border-ghost-border/30 rounded-2xl bg-black/30">
+              <p className="font-barlow font-bold text-ghost-gray uppercase tracking-wider mb-2">Aucun lobby généré</p>
+              <p className="text-ghost-gray/60 text-sm">Veuillez d'abord prévisualiser et enregistrer les lobbys FFA depuis l'onglet <strong>Brackets</strong>.</p>
+            </div>
+          ) : (
             <div className="space-y-6 mb-10 border-b border-ghost-border/30 pb-10">
               {lobbies.map((round) => (
                 <div key={round.round}>
