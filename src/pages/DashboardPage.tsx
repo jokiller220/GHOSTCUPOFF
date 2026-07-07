@@ -76,7 +76,8 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
     const { data: teamMembers } = await supabase
       .from('team_members')
       .select('team_id')
-      .eq('profile_id', profile!.id);
+      .eq('profile_id', profile!.id)
+      .eq('status', 'active');
     const teamIds = teamMembers?.map(tm => tm.team_id) || [];
 
     if (teamIds.length > 0) {

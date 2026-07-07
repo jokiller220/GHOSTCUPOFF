@@ -33,7 +33,8 @@ export default function MesMatchsPage({ onNavigate }: MesMatchsPageProps) {
         const { data: teamMembers } = await supabase
           .from('team_members')
           .select('team_id')
-          .eq('profile_id', profile.id);
+          .eq('profile_id', profile.id)
+          .eq('status', 'active');
         teamIds = teamMembers?.map(tm => tm.team_id) || [];
       }
 
