@@ -38,8 +38,10 @@ function pairKey(a: string, b: string) {
 
 export function formatScheduledAt(date: string, time: string) {
   const timeStr = time.length === 5 ? `${time}:00` : time;
-  // Les heures configurées sont en Heure de France (CEST = UTC+02:00 en Juillet)
-  return `${date}T${timeStr}+02:00`;
+  // Combine date and time to let the browser parse it in the admin's LOCAL timezone
+  const localDate = new Date(`${date}T${timeStr}`);
+  // Return the universal UTC ISO string (e.g. 2026-07-09T19:00:00.000Z)
+  return localDate.toISOString();
 }
 
 const MODES_4V4 = [
