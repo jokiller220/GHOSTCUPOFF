@@ -137,9 +137,6 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* Hero section */}
       <section
         className="relative min-h-[70vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #0a0a0a 0%, #111111 40%, #0f0c08 100%)',
-        }}
       >
         {/* Gold vignette */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-ghost-black" />
@@ -291,7 +288,7 @@ export default function Home({ onNavigate }: HomeProps) {
       </section>
 
       {announcements.length > 0 && (
-        <section className="bg-ghost-dark border-y border-ghost-border py-8 px-4 md:px-6">
+        <section className="bg-ghost-dark/70 backdrop-blur border-y border-ghost-border/50 py-8 px-4 md:px-6">
           <div className="max-w-7xl mx-auto">
             <p className="section-title text-center">ANNONCES</p>
             <div className="grid gap-4 md:grid-cols-3 mt-6">
@@ -364,7 +361,7 @@ export default function Home({ onNavigate }: HomeProps) {
       </section>
 
       {/* CTA section */}
-      <section className="bg-ghost-dark border-y border-ghost-border py-10 md:py-16 px-4 md:px-6">
+      <section className="bg-ghost-dark/70 backdrop-blur border-y border-ghost-border/50 py-10 md:py-16 px-4 md:px-6">
         <div className="max-w-7xl mx-auto text-center">
           <p className="section-title text-center">REJOINS L'ARÈNE</p>
           <h2 className="font-barlow font-black text-4xl md:text-5xl text-white uppercase mb-6">
