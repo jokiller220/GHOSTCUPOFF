@@ -45,6 +45,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [_activeBracketMatches, setActiveBracketMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     load();
@@ -52,61 +53,79 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
   async function load() {
     setLoading(true);
+    setErrorMsg(null);
 
-    // Stats
-    const [
-      { data: settings },
-      { count: playerCount },
-      { count: teamCount },
-      { count: playedCount },
-      { count: pendingCount },
-      { count: proofsPendingCount },
-    ] = await Promise.all([
-      supabase.from('tournament_settings').select('max_players').single(),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player'),
-      supabase.from('teams').select('*', { count: 'exact', head: true }),
-      supabase.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
-      supabase.from('matches').select('*', { count: 'exact', head: true }).in('status', ['scheduled', 'live']),
-      supabase.from('score_proofs').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-    ]);
+    try {
+      // Stats
+      const [
+        { data: settings, error: err1 },
+        { count: playerCount, error: err2 },
+        { count: teamCount, error: err3 },
+        { count: playedCount, error: err4 },
+        { count: pendingCount, error: err5 },
+        { count: proofsPendingCount, error: err6 },
+      ] = await Promise.all([
+        supabase.from('tournament_settings').select('max_players').single(),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'player'),
+        supabase.from('teams').select('*', { count: 'exact', head: true }),
+        supabase.from('matches').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
+        supabase.from('matches').select('*', { count: 'exact', head: true }).in('status', ['scheduled', 'live']),
+        supabase.from('score_proofs').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      ]);
 
-    const players = playerCount ?? 0;
-    const maxPlayers = settings?.max_players ?? 28;
-    setStats({
-      players,
-      teams: teamCount ?? 0,
-      matchesPlayed: playedCount ?? 0,
-      matchesPending: pendingCount ?? 0,
-      proofsPending: proofsPendingCount ?? 0,
-      availableSlots: Math.max(0, maxPlayers - players),
-    });
+      if (err1 && err1.code !== 'PGRST116') console.error('err1', err1);
+      if (err2) console.error('err2', err2);
+      if (err3) console.error('err3', err3);
+      if (err4) console.error('err4', err4);
+      if (err5) console.error('err5', err5);
+      if (err6) console.error('err6', err6);
 
-    // Activity logs
-    const { data: logs } = await supabase
-      .from('activity_logs')
-      .select('*, admin:profiles(cod_username)')
-      .order('created_at', { ascending: false })
-      .limit(8);
-    setRecentActivity((logs as ActivityLog[]) ?? []);
+      const players = playerCount ?? 0;
+      const maxPlayers = settings?.max_players ?? 28;
+      setStats({
+        players,
+        teams: teamCount ?? 0,
+        matchesPlayed: playedCount ?? 0,
+        matchesPending: pendingCount ?? 0,
+        proofsPending: proofsPendingCount ?? 0,
+        availableSlots: Math.max(0, maxPlayers - players),
+      });
 
-    // Active bracket matches
-    const { data: activeMatches } = await supabase
-      .from('matches')
-      .select('*, team1:profiles!matches_team1_id_fkey(cod_username, seed_rank), team2:profiles!matches_team2_id_fkey(cod_username, seed_rank)')
-      .eq('format', '1v1')
-      .in('status', ['live', 'scheduled'])
-      .order('round_order', { ascending: false })
-      .limit(2);
-    const { data: proofs } = await supabase
-      .from('score_proofs')
-      .select('*')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
-      .limit(6);
-    setPendingProofs((proofs as ScoreProof[]) ?? []);
-    setActiveBracketMatches((activeMatches as Match[]) ?? []);
+      // Activity logs
+      const { data: logs, error: errLogs } = await supabase
+        .from('activity_logs')
+        .select('*, admin:profiles(cod_username)')
+        .order('created_at', { ascending: false })
+        .limit(8);
+      if (errLogs) console.error('errLogs', errLogs);
+      setRecentActivity((logs as ActivityLog[]) ?? []);
 
-    setLoading(false);
+      // Active bracket matches
+      const { data: activeMatches, error: errMatches } = await supabase
+        .from('matches')
+        .select('*, team1:profiles!matches_team1_id_fkey(cod_username, seed_rank), team2:profiles!matches_team2_id_fkey(cod_username, seed_rank)')
+        .eq('format', '1v1')
+        .in('status', ['live', 'scheduled'])
+        .order('round_order', { ascending: false })
+        .limit(2);
+      if (errMatches) console.error('errMatches', errMatches);
+
+      const { data: proofs, error: errProofs } = await supabase
+        .from('score_proofs')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(6);
+      if (errProofs) console.error('errProofs', errProofs);
+      
+      setPendingProofs((proofs as ScoreProof[]) ?? []);
+      setActiveBracketMatches((activeMatches as Match[]) ?? []);
+    } catch (e: any) {
+      console.error('Error in AdminDashboard load:', e);
+      setErrorMsg(e.message || String(e));
+    } finally {
+      setLoading(false);
+    }
   }
 
   const activity = recentActivity;
@@ -136,6 +155,12 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           </button>
         </div>
       </div>
+
+      {errorMsg && (
+        <div className="mb-6 rounded-2xl border border-ghost-red/30 bg-ghost-red/10 px-4 py-3 text-ghost-red text-sm">
+          Erreur de chargement: {errorMsg}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
