@@ -197,7 +197,8 @@ export default function AdminPlanningPage() {
                       newDates[i].date = e.target.value;
                       setRrDates(newDates);
                     }}
-                    className="input-dark flex-1" 
+                    disabled={!isEditing}
+                    className="input-dark flex-1 disabled:opacity-50 disabled:cursor-not-allowed" 
                   />
                   <div className="flex-1 flex flex-col gap-1">
                     <input 
@@ -241,7 +242,8 @@ export default function AdminPlanningPage() {
                       newDates[i].date = e.target.value;
                       setFfaDates(newDates);
                     }}
-                    className="input-dark flex-1" 
+                    disabled={!isEditing}
+                    className="input-dark flex-1 disabled:opacity-50 disabled:cursor-not-allowed" 
                   />
                   <div className="flex-1 flex flex-col gap-1">
                     <input 
@@ -288,7 +290,8 @@ export default function AdminPlanningPage() {
                           newDates[i].date = e.target.value;
                           setBracketDates(newDates);
                         }}
-                        className="input-dark" 
+                        disabled={!isEditing}
+                        className="input-dark disabled:opacity-50 disabled:cursor-not-allowed" 
                       />
                       <div className="flex-1 flex flex-col gap-1">
                         <input 
