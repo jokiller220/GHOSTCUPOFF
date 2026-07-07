@@ -53,12 +53,11 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
     <div className="min-h-[100dvh] bg-ghost-black flex relative">
       {/* Global Background Image */}
       <div 
-        className="fixed inset-0 opacity-20 pointer-events-none z-0"
+        className="fixed inset-0 opacity-40 pointer-events-none z-0 mix-blend-lighten"
         style={{
           backgroundImage: `url("/bacgroungimg.jpg")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'grayscale(50%)',
         }}
       />
 
