@@ -27,12 +27,28 @@ export default function MesMatchsPage({ onNavigate }: MesMatchsPageProps) {
 
   useEffect(() => {
     (async () => {
-      const [{ data: matchData }, { data: entryData }] = await Promise.all([
-        supabase
+      // Get user's teams
+      let teamIds: string[] = [];
+      if (profile) {
+        const { data: teamMembers } = await supabase
+          .from('team_members')
+          .select('team_id')
+          .eq('profile_id', profile.id);
+        teamIds = teamMembers?.map(tm => tm.team_id) || [];
+      }
+
+      let matchPromise = Promise.resolve({ data: [] });
+      if (teamIds.length > 0) {
+        matchPromise = supabase
           .from('matches')
           .select('*, scores:match_scores(*)')
           .eq('format', '4v4')
-          .order('scheduled_at', { ascending: false }),
+          .or(`team1_id.in.(${teamIds.join(',')}),team2_id.in.(${teamIds.join(',')})`)
+          .order('scheduled_at', { ascending: false });
+      }
+
+      const [{ data: matchData }, { data: entryData }, { data: configData }] = await Promise.all([
+        matchPromise,
         profile ? supabase
           .from('tournament_entries')
           .select('team_points, solo_points')
@@ -100,11 +116,23 @@ export default function MesMatchsPage({ onNavigate }: MesMatchsPageProps) {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-ghost-border mb-6">
+      {/* Mobile Select Menu */}
+      <div className="md:hidden mb-6">
+        <select
+          value={tab}
+          onChange={(e) => setTab(e.target.value as any)}
+          className="w-full bg-ghost-card border border-ghost-border text-white px-4 py-3 font-barlow font-black text-sm uppercase tracking-widest focus:border-ghost-gold outline-none transition-colors"
+        >
+          <option value="equipe">Matchs Équipe (BO3)</option>
+          <option value="solo">Parties Solo (FFA)</option>
+        </select>
+      </div>
+
+      {/* Desktop Tabs */}
+      <div className="hidden md:flex border-b border-ghost-border mb-6">
         <button
           onClick={() => setTab('equipe')}
-          className={`px-3 md:px-6 py-3 font-barlow font-black text-[10px] md:text-xs uppercase tracking-widest border-b-2 flex items-center gap-1.5 md:gap-2 transition-all duration-200 whitespace-nowrap ${
+          className={`px-6 py-3 font-barlow font-black text-xs uppercase tracking-widest border-b-2 flex items-center gap-2 transition-all duration-200 ${
             tab === 'equipe' ? 'text-ghost-gold border-ghost-gold' : 'text-ghost-gray border-transparent hover:text-white'
           }`}
         >
@@ -112,7 +140,7 @@ export default function MesMatchsPage({ onNavigate }: MesMatchsPageProps) {
         </button>
         <button
           onClick={() => setTab('solo')}
-          className={`px-3 md:px-6 py-3 font-barlow font-black text-[10px] md:text-xs uppercase tracking-widest border-b-2 flex items-center gap-1.5 md:gap-2 transition-all duration-200 whitespace-nowrap ${
+          className={`px-6 py-3 font-barlow font-black text-xs uppercase tracking-widest border-b-2 flex items-center gap-2 transition-all duration-200 ${
             tab === 'solo' ? 'text-ghost-gold border-ghost-gold' : 'text-ghost-gray border-transparent hover:text-white'
           }`}
         >
