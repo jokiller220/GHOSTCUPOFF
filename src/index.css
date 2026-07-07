@@ -72,27 +72,27 @@
 
 @layer components {
   .btn-gold {
-    @apply bg-ghost-gold hover:bg-ghost-gold-light text-black font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-md;
+    @apply bg-ghost-gold hover:bg-ghost-gold-light text-black font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-xl;
   }
 
   .btn-outline {
-    @apply border border-ghost-border hover:border-ghost-gold text-ghost-gray-light hover:text-ghost-gold font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-md;
+    @apply border border-ghost-border/70 hover:border-ghost-gold text-ghost-gray-light hover:text-ghost-gold font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-xl;
   }
 
   .btn-red {
-    @apply bg-ghost-red hover:bg-ghost-red-light text-white font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-md;
+    @apply bg-ghost-red hover:bg-ghost-red-light text-white font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-xl;
   }
 
   .btn-dark {
-    @apply bg-ghost-card border border-ghost-border hover:border-ghost-gold text-white font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-md;
+    @apply bg-ghost-card/80 backdrop-blur-md border border-ghost-border/50 hover:border-ghost-gold hover:bg-ghost-card text-white font-barlow font-bold uppercase tracking-widest px-6 py-2.5 transition-all duration-200 text-sm rounded-xl;
   }
 
   .card {
-    @apply bg-ghost-card border border-ghost-border;
+    @apply bg-ghost-card/80 backdrop-blur-md border border-ghost-border/50 rounded-3xl shadow-lg;
   }
 
   .input-dark {
-    @apply w-full bg-[#0d0d0d] border border-ghost-border text-white placeholder-ghost-gray px-4 py-3 text-sm focus:outline-none focus:border-ghost-gold transition-colors duration-200;
+    @apply w-full bg-[#0d0d0d]/80 backdrop-blur-sm border border-ghost-border/50 text-white placeholder-ghost-gray px-5 py-3.5 text-sm focus:outline-none focus:border-ghost-gold/80 transition-colors duration-200 rounded-2xl;
     font-size: 16px;
   }
 

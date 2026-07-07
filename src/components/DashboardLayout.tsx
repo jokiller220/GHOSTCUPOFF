@@ -73,14 +73,14 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
       <aside
         className={`
           fixed top-0 left-0 h-full z-50 flex flex-col
-          w-64 bg-ghost-dark border-r border-ghost-border
+          w-64 bg-ghost-dark/80 backdrop-blur-md border-r border-ghost-border/50
           transition-transform duration-300
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0 lg:w-52 lg:z-40
         `}
       >
         {/* Logo + close mobile */}
-        <div className="p-4 border-b border-ghost-border flex items-center justify-between">
+        <div className="p-4 border-b border-ghost-border/50 flex items-center justify-between">
           <Logo onNavigate={(p) => handleNavigate(p as Page)} size="sm" />
           <button
             onClick={() => setSidebarOpen(false)}
@@ -91,7 +91,7 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
         </div>
 
         {/* User info */}
-        <div className="px-4 py-4 border-b border-ghost-border">
+        <div className="px-4 py-4 border-b border-ghost-border/50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-ghost-gold/20 border border-ghost-gold/40 flex items-center justify-center shrink-0">
               <span className="text-ghost-gold font-barlow font-black text-xs">
@@ -168,7 +168,7 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
         </nav>
 
         {/* Sign out */}
-        <div className="p-4 border-t border-ghost-border">
+        <div className="p-4 border-t border-ghost-border/50">
           <button
             onClick={handleSignOut}
             className="sidebar-link w-full text-ghost-red hover:text-red-400 hover:bg-red-950/20"
@@ -183,7 +183,7 @@ export default function DashboardLayout({ children, currentPage, onNavigate }: D
       <div className="flex-1 lg:ml-52 flex flex-col min-h-[100dvh] relative z-10">
 
         {/* Top bar — mobile hamburger + breadcrumb */}
-        <header className="sticky top-0 z-30 bg-ghost-dark/95 backdrop-blur border-b border-ghost-border px-4 h-14 flex items-center justify-between">
+        <header className="sticky top-0 z-30 flex items-center justify-between p-4 bg-ghost-dark/80 backdrop-blur-md border-b border-ghost-border/50 lg:bg-transparent lg:border-none lg:backdrop-blur-none lg:justify-end lg:p-6 lg:mb-2">
           <div className="flex items-center gap-3">
             {/* Hamburger mobile */}
             <button

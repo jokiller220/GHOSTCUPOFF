@@ -68,14 +68,14 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
       {/* === SIDEBAR === */}
       <aside
         className={`
-          fixed top-0 left-0 h-full z-50 flex flex-col bg-ghost-dark border-r border-ghost-border
+          fixed top-0 left-0 h-full z-50 flex flex-col bg-ghost-dark/80 backdrop-blur-md border-r border-ghost-border/50
           transition-all duration-300
           ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'}
           lg:translate-x-0 lg:z-40 ${desktopCollapsed ? 'lg:w-[60px]' : 'lg:w-52'}
         `}
       >
         {/* Logo + close mobile */}
-        <div className={`p-4 border-b border-ghost-border flex items-center gap-2 ${desktopCollapsed ? 'justify-center' : 'justify-between'}`}>
+        <div className={`p-4 border-b border-ghost-border/50 flex items-center gap-2 ${desktopCollapsed ? 'justify-center' : 'justify-between'}`}>
           {!desktopCollapsed ? (
             <Logo onNavigate={(p) => handleNavigate(p as Page)} size="sm" />
           ) : (
@@ -92,7 +92,7 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
         </div>
 
         {/* Admin badge */}
-        <div className={`py-3 border-b border-ghost-border ${desktopCollapsed ? 'px-0 flex justify-center' : 'px-4'}`}>
+        <div className={`py-3 border-b border-ghost-border/50 ${desktopCollapsed ? 'px-0 flex justify-center' : 'px-4'}`}>
           <div className="flex items-center gap-2">
             <Shield size={14} className="text-ghost-red" title="Admin Panel" />
             {!desktopCollapsed && <span className="text-ghost-red font-barlow font-black text-xs uppercase tracking-widest">Admin</span>}
@@ -126,7 +126,7 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
         </nav>
 
         {/* Footer actions */}
-        <div className="p-4 border-t border-ghost-border flex justify-center">
+        <div className="p-4 border-t border-ghost-border/50 flex justify-center">
           <button
             onClick={handleSignOut}
             title={desktopCollapsed ? 'Déconnexion' : undefined}
@@ -142,7 +142,7 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
       <div className={`flex-1 flex flex-col min-h-[100dvh] relative z-10 transition-all duration-300 ${desktopCollapsed ? 'lg:ml-[60px]' : 'lg:ml-52'}`}>
 
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-ghost-dark/95 backdrop-blur border-b border-ghost-border px-4 h-14 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-ghost-dark/70 backdrop-blur-lg border-b border-ghost-border/50 px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Hamburger mobile & desktop toggle */}
             <button
@@ -162,7 +162,7 @@ export default function AdminLayout({ children, currentPage, onNavigate }: Admin
             </span>
           </div>
 
-          <div className="flex items-center gap-2 bg-ghost-red/10 border border-ghost-red/30 px-2 py-1 sm:px-3">
+          <div className="flex items-center gap-2 bg-ghost-red/10 border border-ghost-red/30 rounded-full px-3 py-1.5 sm:px-4">
             <Shield size={12} className="text-ghost-red" />
             <span className="text-ghost-red text-[10px] font-barlow font-bold uppercase tracking-wider hidden sm:block">Mode Admin</span>
           </div>
