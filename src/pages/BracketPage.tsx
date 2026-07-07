@@ -136,39 +136,52 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
         </div>
       )}
 
-      {/* Tabs — scrollable on mobile */}
-      <div className="flex border-b border-ghost-border mb-6 md:mb-8 overflow-x-auto whitespace-nowrap hide-scrollbar">
+      {/* Mobile Select Menu */}
+      <div className="md:hidden mb-6">
+        <select
+          value={activeTab}
+          onChange={(e) => setActiveTab(e.target.value as any)}
+          className="w-full bg-ghost-card border border-ghost-border text-white px-4 py-3 font-barlow font-black text-sm uppercase tracking-widest focus:border-ghost-gold outline-none transition-colors"
+        >
+          <option value="classement">Classement (Phase 1)</option>
+          <option value="solo">Mêlée Générale (FFA)</option>
+          <option value="bracket">Finale 1v1 (Phase 2)</option>
+        </select>
+      </div>
+
+      {/* Desktop Tabs */}
+      <div className="hidden md:flex border-b border-ghost-border mb-8">
         <button
           onClick={() => setActiveTab('classement')}
-          className={`px-4 md:px-8 py-3 font-barlow font-black text-xs md:text-sm uppercase tracking-widest border-b-2 transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
+          className={`px-8 py-3 font-barlow font-black text-sm uppercase tracking-widest border-b-2 transition-all duration-200 flex items-center gap-2 ${
             activeTab === 'classement'
               ? 'text-ghost-gold border-ghost-gold'
               : 'text-ghost-gray border-transparent hover:text-white'
           }`}
         >
-          <Users size={14} className="hidden sm:block" />
+          <Users size={14} />
           Classement (Phase 1)
         </button>
         <button
           onClick={() => setActiveTab('solo')}
-          className={`px-4 md:px-8 py-3 font-barlow font-black text-xs md:text-sm uppercase tracking-widest border-b-2 transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
+          className={`px-8 py-3 font-barlow font-black text-sm uppercase tracking-widest border-b-2 transition-all duration-200 flex items-center gap-2 ${
             activeTab === 'solo'
               ? 'text-ghost-gold border-ghost-gold'
               : 'text-ghost-gray border-transparent hover:text-white'
           }`}
         >
-          <Target size={14} className="hidden sm:block" />
+          <Target size={14} />
           Mêlée Générale (FFA)
         </button>
         <button
           onClick={() => setActiveTab('bracket')}
-          className={`px-4 md:px-8 py-3 font-barlow font-black text-xs md:text-sm uppercase tracking-widest border-b-2 transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
+          className={`px-8 py-3 font-barlow font-black text-sm uppercase tracking-widest border-b-2 transition-all duration-200 flex items-center gap-2 ${
             activeTab === 'bracket'
               ? 'text-ghost-gold border-ghost-gold'
               : 'text-ghost-gray border-transparent hover:text-white'
           }`}
         >
-          <Trophy size={14} className="hidden sm:block" />
+          <Trophy size={14} />
           Finale 1v1 (Phase 2)
         </button>
       </div>
