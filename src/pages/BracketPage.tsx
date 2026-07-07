@@ -137,7 +137,7 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
       )}
 
       {/* Tabs — scrollable on mobile */}
-      <div className="flex border-b border-ghost-border mb-6 md:mb-8 overflow-x-auto">
+      <div className="flex border-b border-ghost-border mb-6 md:mb-8 overflow-x-auto whitespace-nowrap hide-scrollbar">
         <button
           onClick={() => setActiveTab('classement')}
           className={`px-4 md:px-8 py-3 font-barlow font-black text-xs md:text-sm uppercase tracking-widest border-b-2 transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
