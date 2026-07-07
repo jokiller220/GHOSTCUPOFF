@@ -72,9 +72,13 @@ export default function AdminPlanningPage() {
     setMessage('');
     
     // Check if dates are well formed
-    const rrConfig = { dates: rrDates };
-    const ffaConfig = { dates: ffaDates };
-    const bracketConfig = { dates: bracketDates };
+    const existingRr = configs.find(c => c.type === 'round_robin')?.config || {};
+    const existingFfa = configs.find(c => c.type === 'ffa')?.config || {};
+    const existingBracket = configs.find(c => c.type === 'bracket')?.config || {};
+
+    const rrConfig = { ...existingRr, dates: rrDates };
+    const ffaConfig = { ...existingFfa, dates: ffaDates };
+    const bracketConfig = { ...existingBracket, dates: bracketDates };
 
     await supabase.from('schedule_config').upsert([
       { type: 'round_robin', config: rrConfig },
