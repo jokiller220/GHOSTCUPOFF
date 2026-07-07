@@ -23,7 +23,14 @@ export default function AdminPlanningPage() {
     if (data) {
       setConfigs(data as ScheduleConfig[]);
       const rr = data.find(c => c.type === 'round_robin');
-      if (rr) setRrDates(rr.config.dates || []);
+      let loadedRrDates = rr?.config.dates || [];
+      // Pad to 7 rounds for 7 teams format
+      if (loadedRrDates.length < 7) {
+        const padded = [...loadedRrDates];
+        while (padded.length < 7) padded.push({ date: '', time: '' });
+        loadedRrDates = padded;
+      }
+      setRrDates(loadedRrDates);
       
       const ffa = data.find(c => c.type === 'ffa');
       if (ffa) setFfaDates(ffa.config.dates || []);

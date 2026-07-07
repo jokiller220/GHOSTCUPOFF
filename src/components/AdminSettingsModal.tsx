@@ -130,7 +130,7 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
       
       const { error: rrError } = await supabase.from('schedule_config').upsert({
         type: 'round_robin',
-        config: { dates: [{ date: "2026-07-09", time: "21:00" }, { date: "2026-07-09", time: "21:45" }, { date: "2026-07-09", time: "22:30" }, { date: "2026-07-10", time: "21:00" }, { date: "2026-07-10", time: "21:45" }] }
+        config: { dates: [{ date: "2026-07-09", time: "21:00" }, { date: "2026-07-09", time: "21:45" }, { date: "2026-07-09", time: "22:30" }, { date: "2026-07-10", time: "21:00" }, { date: "2026-07-10", time: "21:45" }, { date: "2026-07-10", time: "22:30" }, { date: "2026-07-11", time: "21:00" }] }
       }, { onConflict: 'type' });
       
       const { error: bracketError } = await supabase.from('schedule_config').upsert({
