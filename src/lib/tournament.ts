@@ -38,10 +38,10 @@ function pairKey(a: string, b: string) {
 
 export function formatScheduledAt(date: string, time: string) {
   const timeStr = time.length === 5 ? `${time}:00` : time;
-  // Combine date and time to let the browser parse it in the admin's LOCAL timezone
-  const localDate = new Date(`${date}T${timeStr}`);
-  // Return the universal UTC ISO string (e.g. 2026-07-09T19:00:00.000Z)
-  return localDate.toISOString();
+  // Le tournoi est basé au Togo (UTC+0). On force l'interprétation en UTC
+  // pour que l'heure saisie soit toujours considérée comme l'heure du Togo.
+  const utcDate = new Date(`${date}T${timeStr}Z`);
+  return utcDate.toISOString();
 }
 
 const MODES_4V4 = [

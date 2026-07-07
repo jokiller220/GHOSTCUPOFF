@@ -18,7 +18,7 @@ export default function AdminPlanningPage() {
   function getHelperText(date: string, time: string) {
     if (!date || !time) return null;
     const timeStr = time.length === 5 ? `${time}:00` : time;
-    const d = new Date(`${date}T${timeStr}`);
+    const d = new Date(`${date}T${timeStr}Z`);
     if (isNaN(d.getTime())) return null;
     const frTime = d.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' });
     return `(${frTime} FR)`;
@@ -30,7 +30,7 @@ export default function AdminPlanningPage() {
       const t = time.trim();
       if (!t) return '';
       const timeStr = t.length === 5 ? `${t}:00` : t;
-      const d = new Date(`${date}T${timeStr}`);
+      const d = new Date(`${date}T${timeStr}Z`);
       if (isNaN(d.getTime())) return '';
       return d.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' });
     }).filter(Boolean);
