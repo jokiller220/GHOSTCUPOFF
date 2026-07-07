@@ -163,7 +163,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
             {/* Breakdown mini bar */}
             <div className="mt-3 card px-3 md:px-5 py-2 md:py-3 flex items-center gap-2 md:gap-4 text-[10px] md:text-xs flex-wrap">
               <span className="font-barlow text-ghost-gray">Phase :</span>
-              <span className="font-barlow font-bold text-white">4 matchs équipe (BO3)</span>
+              <span className="font-barlow font-bold text-white">6 matchs équipe (BO3)</span>
               <span className="text-ghost-border">·</span>
               <span className="font-barlow font-bold text-white">4 parties solo (FFA)</span>
               <span className="text-ghost-border">·</span>

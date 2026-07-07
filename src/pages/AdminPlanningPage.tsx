@@ -151,7 +151,7 @@ export default function AdminPlanningPage() {
               <CalendarIcon size={18} className="text-ghost-gold" />
               <h2 className="font-barlow font-black text-xl text-white uppercase tracking-wider">Round Robin (4v4)</h2>
             </div>
-            <p className="text-ghost-gray text-xs mb-4">Définissez la date et l'heure de chaque tour (5 tours). Les 3 premiers matchs se jouent le jour 1, les 2 derniers le jour 2 en général.</p>
+            <p className="text-ghost-gray text-xs mb-4">Définissez la date et l'heure de chaque tour (7 tours). Les matchs se répartissent généralement sur le week-end.</p>
             <div className="space-y-3">
               {rrDates.map((item, i) => (
                 <div key={`rr-${i}`} className="flex items-center gap-3">

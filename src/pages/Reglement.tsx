@@ -34,9 +34,10 @@ const sections = [
     id: 'structure',
     title: 'Article 3 — Structure de la compétition',
     content: [
-      { heading: 'Phase 1 : Qualifications (9 matchs/parties)', items: [
-        'Bloc Équipe (5 matchs) : 6 équipes de 4 en poule unique. Format round-robin complet en BO3 (Search & Destroy, Contrôle, Hardpoint).',
-        'Bloc Solo (4 parties) : 4 parties de Kill Confirmed en mêlée générale (FFA) (lobbys de 6-8 joueurs mélangés aléatoirement).',
+      { heading: 'Phase 1 : Qualifications (10 matchs/parties)', items: [
+        'Bloc Équipe (6 matchs) : 7 équipes de 4 en poule unique. Format round-robin complet en BO3 (Search & Destroy, Contrôle, Hardpoint, etc.).',
+        'Bloc Solo (4 parties) : 4 parties de Mêlée Générale (FFA).',
+        'Score : Les points Équipe et Solo s\'additionnent pour former le score individuel de chaque joueur.',
         'Points Équipe : Victoire nette (2-0/3-0) = 3 pts | Victoire courte (2-1) = 2 pts | Défaite courte (1-2) = 1 pt | Défaite nette (0-2/0-3) = 0 pt.',
         'Points Solo (FFA) : 1er = 5 pts | 2e = 3 pts | 3e = 2 pts | 4e = 1 pt | 5e et + = 0 pt.'
       ] },
