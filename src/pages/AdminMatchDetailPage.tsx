@@ -78,12 +78,24 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
       const s = (sc as MatchScore[])?.find(x => x.manche_number === i);
       init[i] = { t1: s?.team1_score?.toString() ?? '', t2: s?.team2_score?.toString() ?? '' };
     }
+
+    // Auto-fill from proof if no scores exist yet
+    if ((!sc || sc.length === 0) && prfs && prfs.length > 0) {
+      const latestProof = prfs[0];
+      if (latestProof.team1_score !== undefined && latestProof.team2_score !== undefined && latestProof.team1_score !== null) {
+        init[1] = {
+          t1: latestProof.team1_score.toString(),
+          t2: latestProof.team2_score.toString()
+        };
+      }
+    }
+
     setEditScores(init);
     setScheduledAt(data?.scheduled_at ? data.scheduled_at.slice(0, 16) : '');
     setLoading(false);
   }
 
-  async function saveScores() {
+  async function saveScores(silent = false) {
     setSaving(true);
     setError('');
     try {
@@ -101,10 +113,12 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
       }
       await logActivity('score_validated', { match: `${match?.team1_name} vs ${match?.team2_name}`, desc: `Score modifié par admin` });
       await load();
-      setSuccess('Scores mis à jour.');
-      setTimeout(() => setSuccess(''), 3000);
+      if (!silent) {
+        setSuccess('Scores mis à jour.');
+        setTimeout(() => setSuccess(''), 3000);
+      }
     } catch {
-      setError('Erreur lors de la sauvegarde.');
+      if (!silent) setError('Erreur lors de la sauvegarde.');
     }
     setSaving(false);
   }
@@ -205,9 +219,25 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
 
   async function validateScore() {
     if (!match) return;
-    // Determine winner
-    const t1W = scores.filter(s => s.team1_score > s.team2_score).length;
-    const t2W = scores.filter(s => s.team2_score > s.team1_score).length;
+    
+    // Auto-save editScores before validating if they haven't been saved yet
+    const hasUnsavedScores = Object.values(editScores).some(s => s.t1 !== '' || s.t2 !== '');
+    if (hasUnsavedScores) {
+      await saveScores(true); // pass true to suppress success toast from saveScores
+    }
+
+    // Determine winner based on the NEW scores array (we need to fetch it or compute it)
+    // Wait, saveScores calls load() which updates 'scores' state asynchronously, 
+    // but we need it immediately. Let's just compute from editScores directly to be safe and instant.
+    let t1W = 0;
+    let t2W = 0;
+    for (let i = 1; i <= 5; i++) {
+      const t1 = parseInt(editScores[i]?.t1) || 0;
+      const t2 = parseInt(editScores[i]?.t2) || 0;
+      if (t1 > t2) t1W++;
+      if (t2 > t1) t2W++;
+    }
+
     const winnerId = t1W > t2W ? match.team1_id : t2W > t1W ? match.team2_id : null;
     setSaving(true);
     await supabase.from('matches').update({ status: 'completed', winner_id: winnerId }).eq('id', matchId);
@@ -492,7 +522,7 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
               <Check size={14} /> VALIDER LE SCORE
             </button>
             <button
-              onClick={saveScores}
+              onClick={() => saveScores()}
               disabled={saving}
               className="btn-dark text-xs py-3 flex items-center justify-center gap-2 disabled:opacity-50"
             >
