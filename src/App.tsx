@@ -56,6 +56,9 @@ function AppContent() {
 
   useEffect(() => {
     const handleHashChange = () => {
+      // Trigger automated match updates
+      supabase.rpc('auto_update_matches').then(() => {}).catch(() => {});
+      
       const hash = window.location.hash.replace('#', '');
       if (hash) {
         const parts = hash.split('/');
@@ -77,6 +80,9 @@ function AppContent() {
     }
     
     checkMaintenance();
+    
+    // Trigger automated match updates on initial load
+    supabase.rpc('auto_update_matches').then(() => {}).catch(() => {});
     
     const settingsChannel = supabase
       .channel('app-settings')
