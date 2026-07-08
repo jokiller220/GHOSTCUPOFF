@@ -139,7 +139,7 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
       details: {
         match_id: matchId,
         submitted_by: profile.id,
-        file_url: proofUrl,
+        file_url: proofUrlsString,
         comment: comment || null,
         team1_score: parseInt(team1Score),
         team2_score: parseInt(team2Score)
