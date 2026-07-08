@@ -282,8 +282,35 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
     }
 
     const winnerId = t1W > t2W ? match.team1_id : t2W > t1W ? match.team2_id : null;
+    const winnerName = t1W > t2W ? match.team1_name : t2W > t1W ? match.team2_name : null;
+    
     setSaving(true);
     await supabase.from('matches').update({ status: 'completed', winner_id: winnerId }).eq('id', matchId);
+    
+    // Auto-advance winner for Bracket matches
+    if (match.next_match_id && winnerId && winnerName) {
+      const isOddMatch = match.match_order % 2 !== 0;
+      const updateField = isOddMatch ? 'team1_id' : 'team2_id';
+      const nameField = isOddMatch ? 'team1_name' : 'team2_name';
+      
+      const { data: nextMatchData } = await supabase.from('matches').select('team1_id, team2_id').eq('id', match.next_match_id).single();
+      
+      const updateObj: any = {
+        [updateField]: winnerId,
+        [nameField]: winnerName,
+      };
+
+      if (nextMatchData) {
+        const otherTeamId = isOddMatch ? nextMatchData.team2_id : nextMatchData.team1_id;
+        if (otherTeamId) {
+           updateObj.status = 'scheduled';
+        }
+      }
+
+      await supabase.from('matches').update(updateObj).eq('id', match.next_match_id);
+      await logActivity('advance_next_match', { match: match.id, next_match_id: match.next_match_id });
+    }
+    
     await supabase.from('score_proofs').update({ status: 'approved' }).eq('match_id', matchId).eq('status', 'pending');
     await logActivity('score_validated', { match: `${match.team1_name} vs ${match.team2_name}`, desc: `Score validé : ${t1W}-${t2W}` });
     await sendMatchNotification(
