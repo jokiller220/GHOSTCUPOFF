@@ -104,6 +104,9 @@ export default function AdminBracketsPage({ onNavigate }: AdminBracketsPageProps
         await supabase.from('notifications').insert(notifications);
       }
 
+      // Initialize the leaderboard entries for all participating players
+      await supabase.rpc('initialize_tournament_entries');
+
       await load();
     }
     setLoading(false);

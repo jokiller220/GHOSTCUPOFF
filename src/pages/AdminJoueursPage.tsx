@@ -213,21 +213,38 @@ export default function AdminJoueursPage() {
     setTimeout(() => setSuccess(''), 4000);
   }
 
+  async function syncLeaderboard() {
+    setLoading(true);
+    const { error } = await supabase.rpc('initialize_tournament_entries');
+    if (error) {
+      alert("Erreur lors de l'initialisation: " + error.message);
+    } else {
+      alert("Classement initialisé/synchronisé avec succès !");
+      await load();
+    }
+    setLoading(false);
+  }
+
   return (
     <div className="animate-slide-up">
       <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
         <div>
           <p className="section-title">ADMIN</p>
-          <h1 className="font-barlow font-black text-3xl text-white uppercase">JOUEURS & ÉQUIPES</h1>
+          <h1 className="font-barlow font-black text-3xl text-white uppercase">GESTION DES JOUEURS</h1>
         </div>
-        <button
-          onClick={autoDistributePlayers}
-          disabled={saving}
-          className="btn-gold text-xs py-2 px-4 flex items-center gap-2 uppercase tracking-widest disabled:opacity-50"
-        >
-          {saving ? <RefreshCw size={12} className="animate-spin" /> : <Users size={12} />}
-          Clôturer & Répartir
-        </button>
+        <div className="flex gap-2">
+          <button onClick={syncLeaderboard} className="btn-dark text-xs py-2 px-4 flex items-center gap-2">
+            <RefreshCw size={12} /> INITIALISER CLASSEMENT
+          </button>
+          <button
+            onClick={autoDistributePlayers}
+            disabled={saving}
+            className="btn-gold text-xs py-2 px-4 flex items-center gap-2 uppercase tracking-widest disabled:opacity-50"
+          >
+            {saving ? <RefreshCw size={12} className="animate-spin" /> : <Users size={12} />}
+            Clôturer & Répartir
+          </button>
+        </div>
       </div>
 
       {error && (
