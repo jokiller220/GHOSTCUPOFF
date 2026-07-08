@@ -377,11 +377,17 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
                             {p.status}
                           </span>
                         </div>
-                        <p className="text-ghost-gray text-xs mb-2">Score déclaré : <span className="font-bold text-white">{p.team1_score} - {p.team2_score}</span></p>
-                        {p.comment && <p className="text-ghost-gray text-xs italic mb-2">"{p.comment}"</p>}
-                        <a href={p.file_url} target="_blank" rel="noopener noreferrer" className="text-ghost-gold text-xs underline font-barlow hover:text-white transition-colors">
-                          Voir la preuve jointe
-                        </a>
+                        {p.team1_score !== undefined && p.team2_score !== undefined && (
+                          <p className="text-ghost-gray text-xs mb-2">Score déclaré : <span className="font-bold text-white">{p.team1_score} - {p.team2_score}</span></p>
+                        )}
+                        {p.comment && <p className="text-ghost-gray text-xs italic mb-2 whitespace-pre-wrap">"{p.comment}"</p>}
+                        <div className="flex flex-col gap-1 mt-2">
+                          {p.file_url.split(',').map((url, i) => (
+                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-ghost-gold text-xs underline font-barlow hover:text-white transition-colors">
+                              Voir la preuve jointe {p.file_url.includes(',') ? `#${i+1}` : ''}
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>

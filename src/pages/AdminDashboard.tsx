@@ -287,9 +287,13 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                   </div>
                   <span className="text-ghost-gold text-[11px] uppercase tracking-widest">{proof.status}</span>
                 </div>
-                <a href={proof.file_url} target="_blank" rel="noreferrer" className="mt-3 block text-ghost-gold text-xs underline">
-                  Voir la preuve
-                </a>
+                <div className="mt-3 flex flex-col gap-1">
+                  {proof.file_url.split(',').map((url, i) => (
+                    <a key={i} href={url} target="_blank" rel="noreferrer" className="block text-ghost-gold text-xs underline hover:text-white transition-colors">
+                      Voir la preuve {proof.file_url.includes(',') ? `#${i+1}` : ''}
+                    </a>
+                  ))}
+                </div>
               </div>
             ))
           ) : (

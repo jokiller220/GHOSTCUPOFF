@@ -14,7 +14,7 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
   const [match, setMatch] = useState<Match | null>(null);
   const [team1Score, setTeam1Score] = useState<string>('');
   const [team2Score, setTeam2Score] = useState<string>('');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [comment, setComment] = useState('');
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,24 +36,33 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
     setLoading(false);
   }
 
-  function handleFileChange(f: File | null) {
-    if (!f) return;
+  function handleFileChange(newFiles: FileList | File[] | null) {
+    if (!newFiles || newFiles.length === 0) return;
     const MAX_MB = 20;
-    if (f.size > MAX_MB * 1024 * 1024) {
-      setError(`Fichier trop volumineux. Maximum ${MAX_MB}MB.`);
-      return;
-    }
-    if (!['image/jpeg', 'image/png', 'image/gif'].includes(f.type)) {
-      setError('Format invalide. Acceptés : JPG, PNG, GIF.');
-      return;
+    const validFiles: File[] = [];
+    for (let i = 0; i < newFiles.length; i++) {
+      const f = newFiles[i];
+      if (f.size > MAX_MB * 1024 * 1024) {
+        setError(`Le fichier ${f.name} est trop volumineux. Maximum ${MAX_MB}MB.`);
+        return;
+      }
+      if (!['image/jpeg', 'image/png', 'image/gif'].includes(f.type)) {
+        setError(`Le format du fichier ${f.name} est invalide. Acceptés : JPG, PNG, GIF.`);
+        return;
+      }
+      validFiles.push(f);
     }
     setError('');
-    setFile(f);
+    setFiles(prev => [...prev, ...validFiles]);
+  }
+
+  function removeFile(index: number) {
+    setFiles(prev => prev.filter((_, i) => i !== index));
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!file) { setError('Veuillez sélectionner un fichier.'); return; }
+    if (files.length === 0) { setError('Veuillez sélectionner au moins un fichier.'); return; }
     if (!profile) { setError('Vous devez être connecté.'); return; }
     if (team1Score === '' || team2Score === '') { setError('Veuillez renseigner les deux scores.'); return; }
 
@@ -74,32 +83,55 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
     }
 
     // Upload to Supabase Storage
-    const ext = file.name.split('.').pop();
-    const path = `proofs/${matchId}/${profile.id}_${Date.now()}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from('score-proofs')
-      .upload(path, file, { upsert: true });
+    const uploadedUrls: string[] = [];
+    for (const f of files) {
+      const ext = f.name.split('.').pop();
+      const path = `proofs/${matchId}/${profile.id}_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('score-proofs')
+        .upload(path, f, { upsert: true });
 
-    let proofUrl = `local:${file.name}`;
-    if (!uploadError) {
-      const { data: { publicUrl } } = supabase.storage.from('score-proofs').getPublicUrl(path);
-      proofUrl = publicUrl;
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage.from('score-proofs').getPublicUrl(path);
+        uploadedUrls.push(publicUrl);
+      } else {
+        uploadedUrls.push(`local:${f.name}`);
+      }
     }
 
-    const { error: rpcError } = await supabase.rpc('handle_proof_submission', {
-      p_match_id: matchId,
-      p_submitted_by: profile.id,
-      p_file_url: proofUrl,
-      p_comment: comment || null,
-      p_team1_score: parseInt(team1Score),
-      p_team2_score: parseInt(team2Score),
-      p_team_side: teamSide
-    });
+    const proofUrlsString = uploadedUrls.join(',');
+    const fullComment = `[Score: ${team1Score} - ${team2Score}] ${comment}`;
+
+    let rpcError = null;
+    try {
+      const { error } = await supabase.rpc('handle_proof_submission', {
+        p_match_id: matchId,
+        p_submitted_by: profile.id,
+        p_file_url: proofUrlsString,
+        p_comment: fullComment,
+        p_team1_score: parseInt(team1Score),
+        p_team2_score: parseInt(team2Score),
+        p_team_side: teamSide
+      });
+      rpcError = error;
+    } catch (e: any) {
+      rpcError = e;
+    }
 
     if (rpcError) {
-      setError(rpcError.message);
-      setUploading(false);
-      return;
+      // Fallback si la fonction RPC n'est pas trouvée (base de données non migrée)
+      const { error: insertError } = await supabase.from('score_proofs').insert({
+        match_id: matchId,
+        submitted_by: profile.id,
+        file_url: proofUrlsString,
+        comment: fullComment,
+        status: 'pending'
+      });
+      if (insertError) {
+        setError(insertError.message || rpcError.message);
+        setUploading(false);
+        return;
+      }
     }
 
     await supabase.from('activity_logs').insert({
@@ -180,12 +212,10 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
         <div className="card p-8 mb-6">
           <p className="section-title mb-4">UPLOAD DE LA PREUVE</p>
           <div
-            className={`border-2 border-dashed p-10 text-center cursor-pointer transition-all duration-200 ${
+            className={`border-2 border-dashed p-10 text-center transition-all duration-200 ${
               dragOver
                 ? 'border-ghost-gold bg-ghost-gold/5'
-                : file
-                ? 'border-ghost-green bg-ghost-green/5'
-                : 'border-ghost-border hover:border-ghost-gold/50'
+                : 'border-ghost-border hover:border-ghost-gold/50 cursor-pointer'
             }`}
             onClick={() => fileRef.current?.click()}
             onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -193,30 +223,46 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
             onDrop={e => {
               e.preventDefault();
               setDragOver(false);
-              handleFileChange(e.dataTransfer.files[0] ?? null);
+              handleFileChange(e.dataTransfer.files);
             }}
           >
-            {file ? (
-              <div className="flex flex-col items-center gap-3">
-                <FileImage size={40} className="text-ghost-green" strokeWidth={1} />
-                <p className="font-barlow font-bold text-ghost-green text-sm">{file.name}</p>
-                <p className="text-ghost-gray text-xs">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-3">
-                <Upload size={40} className="text-ghost-gray/40" strokeWidth={1} />
-                <p className="font-barlow text-ghost-gray text-sm">Glissez votre fichier ici ou</p>
-                <button type="button" className="btn-outline text-xs py-2 px-5">CHOISIR UN FICHIER</button>
-                <p className="text-ghost-gray/50 text-[10px]">Formats acceptés : JPG, PNG, GIF (Max 20MB)</p>
-              </div>
-            )}
+            <div className="flex flex-col items-center gap-3 pointer-events-none">
+              <Upload size={40} className="text-ghost-gray/40" strokeWidth={1} />
+              <p className="font-barlow text-ghost-gray text-sm">Glissez vos fichiers ici ou</p>
+              <button type="button" className="btn-outline text-xs py-2 px-5 pointer-events-auto" onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}>CHOISIR DES FICHIERS</button>
+              <p className="text-ghost-gray/50 text-[10px]">Formats acceptés : JPG, PNG, GIF (Max 20MB par fichier)</p>
+            </div>
           </div>
+          
+          {files.length > 0 && (
+            <div className="mt-6 space-y-3">
+              {files.map((f, idx) => (
+                <div key={idx} className="flex items-center justify-between bg-ghost-dark border border-ghost-border p-3 rounded-md">
+                  <div className="flex items-center gap-3">
+                    <FileImage size={24} className="text-ghost-green" strokeWidth={1} />
+                    <div>
+                      <p className="font-barlow font-bold text-white text-xs">{f.name}</p>
+                      <p className="text-ghost-gray text-[10px]">{(f.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => removeFile(idx)}
+                    className="text-ghost-red hover:text-white transition-colors text-xs font-barlow uppercase"
+                  >
+                    Retirer
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <input
             ref={fileRef}
             type="file"
+            multiple
             accept="image/jpeg,image/png,image/gif"
             className="hidden"
-            onChange={e => handleFileChange(e.target.files?.[0] ?? null)}
+            onChange={e => handleFileChange(e.target.files)}
           />
         </div>
 
