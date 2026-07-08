@@ -38,9 +38,10 @@ import AdminAnnoncesPage from './pages/AdminAnnoncesPage';
 import AdminBracketsPage from './pages/AdminBracketsPage';
 import AdminPlanningPage from './pages/AdminPlanningPage';
 import AdminFFAPage from './pages/AdminFFAPage';
+import AdminPlayerDetailPage from './pages/AdminPlayerDetailPage';
 
 const PLAYER_PAGES: Page[] = ['dashboard', 'mes-matchs', 'mon-equipe', 'notifications', 'parametres', 'match-detail', 'preuve-score'];
-const ADMIN_PAGES: Page[] = ['admin', 'admin-matchs', 'admin-joueurs', 'admin-brackets', 'admin-annonces', 'admin-match-detail', 'admin-planning', 'admin-ffa'];
+const ADMIN_PAGES: Page[] = ['admin', 'admin-matchs', 'admin-joueurs', 'admin-brackets', 'admin-annonces', 'admin-match-detail', 'admin-planning', 'admin-ffa', 'admin-player-detail'];
 
 function AppContent() {
   const { profile, loading } = useAuth();
@@ -149,7 +150,10 @@ function AppContent() {
         {currentPage === 'admin-match-detail' && (
           <AdminMatchDetailPage matchId={pageData as string} onNavigate={navigate} />
         )}
-        {currentPage === 'admin-joueurs' && <AdminJoueursPage />}
+        {currentPage === 'admin-player-detail' && (
+          <AdminPlayerDetailPage playerId={pageData as string} onNavigate={navigate} />
+        )}
+        {currentPage === 'admin-joueurs' && <AdminJoueursPage onNavigate={navigate} />}
         {currentPage === 'admin-annonces' && <AdminAnnoncesPage />}
         {currentPage === 'admin-brackets' && <AdminBracketsPage onNavigate={navigate} />}
         {currentPage === 'admin-planning' && <AdminPlanningPage />}

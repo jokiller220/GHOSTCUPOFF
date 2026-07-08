@@ -154,7 +154,8 @@ export type Page =
   | 'admin-brackets'
   | 'admin-match-detail'
   | 'admin-planning'
-  | 'admin-ffa';
+  | 'admin-ffa'
+  | 'admin-player-detail';
 
 export interface ScheduleConfig {
   id: string;

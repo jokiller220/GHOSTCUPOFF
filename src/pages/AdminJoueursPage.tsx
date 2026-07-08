@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 import { Profile, Team, TeamStatus } from '../types';
 import { AdminTeamModal } from '../components/AdminTeamModal';
 
+import { Page } from '../types';
+
 interface LeaderboardEntry {
   profile_id: string;
   rank: number;
@@ -16,7 +18,11 @@ interface LeaderboardEntry {
   qualified: boolean;
 }
 
-export default function AdminJoueursPage() {
+interface AdminJoueursPageProps {
+  onNavigate: (page: Page, data?: unknown) => void;
+}
+
+export default function AdminJoueursPage({ onNavigate }: AdminJoueursPageProps) {
   const [players, setPlayers] = useState<Profile[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [tab, setTab] = useState<'players' | 'teams' | 'leaderboard'>('players');
@@ -296,7 +302,11 @@ export default function AdminJoueursPage() {
       ) : tab === 'players' ? (
         <div className="space-y-2">
           {filteredPlayers.map(p => (
-            <div key={p.id} className="card px-5 py-4 flex items-center gap-4 flex-wrap">
+            <div 
+              key={p.id} 
+              className="card px-5 py-4 flex items-center gap-4 flex-wrap cursor-pointer hover:border-ghost-gold/50 transition-colors"
+              onClick={() => onNavigate('admin-player-detail', p.id)}
+            >
               <div className="w-8 h-8 bg-ghost-gold/10 border border-ghost-gold/20 flex items-center justify-center shrink-0">
                 <span className="font-barlow font-black text-ghost-gold text-xs">{p.cod_username[0]}</span>
               </div>
@@ -311,7 +321,13 @@ export default function AdminJoueursPage() {
                 {new Date(p.created_at).toLocaleDateString('fr-FR')}
               </span>
               {p.role === 'player' && (
-                <button onClick={() => promoteAdmin(p.id)} className="btn-outline text-[9px] py-1 px-2">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    promoteAdmin(p.id);
+                  }} 
+                  className="btn-outline text-[9px] py-1 px-2"
+                >
                   PROMOUVOIR
                 </button>
               )}
