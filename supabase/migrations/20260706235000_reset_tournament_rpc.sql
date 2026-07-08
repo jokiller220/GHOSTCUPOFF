@@ -19,8 +19,8 @@ BEGIN
   DELETE FROM match_scores;
   DELETE FROM matches;
   DELETE FROM tournament_entries;
-  DELETE FROM team_members;
-  DELETE FROM teams;
+  
+  -- Note: team_members and teams are intentionally NOT deleted to preserve the players and their teams.
   
   -- Optionally, clear the schedule config if we want to reset brackets completely
   DELETE FROM schedule_config;
