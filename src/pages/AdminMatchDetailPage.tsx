@@ -238,6 +238,49 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
       if (t2 > t1) t2W++;
     }
 
+    // Calculate and distribute points if it's a team match (not 1v1 Phase 2)
+    if (match.format !== '1v1' && match.team1_id && match.team2_id) {
+      let t1Points = 0;
+      let t2Points = 0;
+      if (t1W > t2W) {
+        if (t1W - t2W >= 2) { t1Points = 3; t2Points = 0; }
+        else { t1Points = 2; t2Points = 1; }
+      } else if (t2W > t1W) {
+        if (t2W - t1W >= 2) { t1Points = 0; t2Points = 3; }
+        else { t1Points = 1; t2Points = 2; }
+      }
+
+      if (t1Points > 0 || t2Points > 0) {
+        const { data: members } = await supabase
+          .from('team_members')
+          .select('profile_id, team_id')
+          .in('team_id', [match.team1_id, match.team2_id])
+          .eq('status', 'active');
+        
+        if (members && members.length > 0) {
+          const profileIds = members.map(m => m.profile_id);
+          const { data: entries } = await supabase
+            .from('tournament_entries')
+            .select('id, profile_id, team_points, team_id')
+            .in('profile_id', profileIds);
+          
+          if (entries) {
+            for (const entry of entries) {
+              // Note: entry.team_id might not be populated if it's not a join, but we can check the members array
+              const memberRecord = members.find(m => m.profile_id === entry.profile_id);
+              const isTeam1 = memberRecord?.team_id === match.team1_id;
+              const ptsToAdd = isTeam1 ? t1Points : t2Points;
+              if (ptsToAdd > 0) {
+                await supabase.from('tournament_entries')
+                  .update({ team_points: (entry.team_points || 0) + ptsToAdd })
+                  .eq('id', entry.id);
+              }
+            }
+          }
+        }
+      }
+    }
+
     const winnerId = t1W > t2W ? match.team1_id : t2W > t1W ? match.team2_id : null;
     setSaving(true);
     await supabase.from('matches').update({ status: 'completed', winner_id: winnerId }).eq('id', matchId);
