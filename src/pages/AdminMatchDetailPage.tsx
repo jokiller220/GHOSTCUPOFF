@@ -486,7 +486,7 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
           <div className="flex flex-col gap-3">
             <button
               onClick={validateScore}
-              disabled={saving || scores.length === 0}
+              disabled={saving}
               className="btn-gold text-xs py-3 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Check size={14} /> VALIDER LE SCORE
