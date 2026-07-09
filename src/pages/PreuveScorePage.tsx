@@ -12,8 +12,13 @@ interface PreuveScorePageProps {
 export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePageProps) {
   const { profile } = useAuth();
   const [match, setMatch] = useState<Match | null>(null);
-  const [team1Score, setTeam1Score] = useState<string>('');
-  const [team2Score, setTeam2Score] = useState<string>('');
+  const [rounds, setRounds] = useState<{t1: string, t2: string}[]>([
+    { t1: '', t2: '' },
+    { t1: '', t2: '' },
+    { t1: '', t2: '' },
+    { t1: '', t2: '' },
+    { t1: '', t2: '' }
+  ]);
   const [files, setFiles] = useState<File[]>([]);
   const [comment, setComment] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -64,7 +69,18 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
     e.preventDefault();
     if (files.length === 0) { setError('Veuillez sélectionner au moins un fichier.'); return; }
     if (!profile) { setError('Vous devez être connecté.'); return; }
-    if (team1Score === '' || team2Score === '') { setError('Veuillez renseigner les deux scores.'); return; }
+    
+    const validRounds = rounds.filter(r => r.t1 !== '' && r.t2 !== '');
+    if (validRounds.length === 0) { setError('Veuillez renseigner le score d\'au moins une manche.'); return; }
+
+    let finalT1 = 0;
+    let finalT2 = 0;
+    validRounds.forEach(r => {
+      const s1 = parseInt(r.t1);
+      const s2 = parseInt(r.t2);
+      if (s1 > s2) finalT1++;
+      else if (s2 > s1) finalT2++;
+    });
 
     setUploading(true);
     setError('');
@@ -100,7 +116,8 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
     }
 
     const proofUrlsString = uploadedUrls.join(',');
-    const fullComment = `[Score: ${team1Score} - ${team2Score}] ${comment}`;
+    const roundDetails = validRounds.map((r, i) => `M${i+1}: ${r.t1}-${r.t2}`).join(', ');
+    const fullComment = `[Score: ${finalT1} - ${finalT2}] (${roundDetails}) ${comment ? '- ' + comment : ''}`;
 
     let rpcError = null;
     try {
@@ -109,8 +126,8 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
         p_submitted_by: profile.id,
         p_file_url: proofUrlsString,
         p_comment: fullComment,
-        p_team1_score: parseInt(team1Score),
-        p_team2_score: parseInt(team2Score),
+        p_team1_score: finalT1,
+        p_team2_score: finalT2,
         p_team_side: teamSide
       });
       rpcError = error;
@@ -140,9 +157,9 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
         match_id: matchId,
         submitted_by: profile.id,
         file_url: proofUrlsString,
-        comment: comment || null,
-        team1_score: parseInt(team1Score),
-        team2_score: parseInt(team2Score)
+        comment: fullComment,
+        team1_score: finalT1,
+        team2_score: finalT2
       },
     });
 
@@ -180,33 +197,49 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
 
       <form onSubmit={handleSubmit}>
         <div className="card p-8 mb-6">
-          <p className="section-title mb-6">RÉSULTAT DU MATCH</p>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="text-center">
-              <label className="block font-barlow font-bold text-white text-sm mb-2">{match?.team1_name ?? 'Équipe 1'}</label>
-              <input 
-                type="number" 
-                min="0" 
-                max="5"
-                className="input-dark w-full text-center text-xl font-black py-4"
-                placeholder="0"
-                value={team1Score}
-                onChange={e => setTeam1Score(e.target.value)}
-              />
-            </div>
-            <div className="text-center">
-              <label className="block font-barlow font-bold text-white text-sm mb-2">{match?.team2_name ?? 'Équipe 2'}</label>
-              <input 
-                type="number" 
-                min="0" 
-                max="5"
-                className="input-dark w-full text-center text-xl font-black py-4"
-                placeholder="0"
-                value={team2Score}
-                onChange={e => setTeam2Score(e.target.value)}
-              />
-            </div>
+          <p className="section-title mb-6">DÉTAIL DES MANCHES</p>
+          <div className="flex justify-between font-barlow font-bold text-white text-sm mb-4 px-4">
+            <span className="w-1/3 text-left">{match?.team1_name ?? 'Équipe 1'}</span>
+            <span className="w-1/3 text-center text-ghost-gray">MANCHES</span>
+            <span className="w-1/3 text-right">{match?.team2_name ?? 'Équipe 2'}</span>
           </div>
+          
+          <div className="space-y-3">
+            {rounds.map((round, idx) => (
+              <div key={idx} className="flex items-center gap-4 bg-ghost-dark/50 p-3 rounded-lg border border-ghost-border/50">
+                <input 
+                  type="number" 
+                  min="0" 
+                  className="input-dark w-full text-center text-lg font-black py-2"
+                  placeholder="0"
+                  value={round.t1}
+                  onChange={e => {
+                    const newRounds = [...rounds];
+                    newRounds[idx].t1 = e.target.value;
+                    setRounds(newRounds);
+                  }}
+                />
+                <span className="font-barlow font-bold text-ghost-gray whitespace-nowrap px-2">
+                  #{idx + 1}
+                </span>
+                <input 
+                  type="number" 
+                  min="0" 
+                  className="input-dark w-full text-center text-lg font-black py-2"
+                  placeholder="0"
+                  value={round.t2}
+                  onChange={e => {
+                    const newRounds = [...rounds];
+                    newRounds[idx].t2 = e.target.value;
+                    setRounds(newRounds);
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-ghost-gray text-xs mt-4">
+            Laissez vides les manches non jouées. Le score final (ex: 3-0) sera calculé automatiquement.
+          </p>
         </div>
 
         <div className="card p-8 mb-6">
