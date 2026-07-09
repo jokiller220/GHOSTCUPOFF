@@ -74,7 +74,7 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
 
     // Initialize edit state
     const init: Record<number, { t1: string; t2: string }> = {};
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 3; i++) {
       const s = (sc as MatchScore[])?.find(x => x.manche_number === i);
       init[i] = { t1: s?.team1_score?.toString() ?? '', t2: s?.team2_score?.toString() ?? '' };
     }
@@ -82,11 +82,22 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
     // Auto-fill from proof if no scores exist yet
     if ((!sc || sc.length === 0) && prfs && prfs.length > 0) {
       const latestProof = prfs[0];
-      if (latestProof.team1_score !== undefined && latestProof.team2_score !== undefined && latestProof.team1_score !== null) {
-        init[1] = {
-          t1: latestProof.team1_score.toString(),
-          t2: latestProof.team2_score.toString()
-        };
+      if (latestProof.comment) {
+        const roundsMatch = latestProof.comment.match(/\((M[1-5]:.*?)\)/);
+        if (roundsMatch) {
+          const roundsStr = roundsMatch[1];
+          const roundsArr = roundsStr.split(', ');
+          roundsArr.forEach(rStr => {
+            const [mPart, scorePart] = rStr.split(': ');
+            if (mPart && scorePart) {
+              const mNum = parseInt(mPart.replace('M', ''));
+              const [t1, t2] = scorePart.split('-');
+              if (mNum >= 1 && mNum <= 3) {
+                init[mNum] = { t1: t1 || '', t2: t2 || '' };
+              }
+            }
+          });
+        }
       }
     }
 
@@ -99,7 +110,7 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
     setSaving(true);
     setError('');
     try {
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 3; i++) {
         const { t1, t2 } = editScores[i] ?? { t1: '', t2: '' };
         if (t1 === '' && t2 === '') continue;
         const t1n = parseInt(t1) || 0;
