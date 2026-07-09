@@ -15,25 +15,32 @@ export async function exportTournamentDataToPDF() {
     
     let currentY = 40;
 
-    // 1. Fetch Equipes
-    const { data: teams } = await supabase.from('teams').select('*').order('points', { ascending: false });
+    // 1. Fetch Equipes and players
+    const { data: teams } = await supabase.from('teams').select('*, profiles!teams_captain_id_fkey(cod_username)').order('points', { ascending: false });
+    const { data: teamPlayers } = await supabase.from('tournament_entries').select('team_id, profiles(cod_username)').not('team_id', 'is', null);
+    
     if (teams && teams.length > 0) {
       doc.setFontSize(14);
       doc.text('Équipes (Classement 4v4)', 14, currentY);
       
-      const teamBody = teams.map((t: any, index: number) => [
-        index + 1,
-        t.name,
-        t.tag || '-',
-        t.points,
-        t.matches_played,
-        t.wins,
-        t.losses
-      ]);
+      const teamBody = teams.map((t: any, index: number) => {
+        const playersInTeam = teamPlayers?.filter(p => p.team_id === t.id).map((p: any) => p.profiles?.cod_username) || [];
+        const playersStr = playersInTeam.join(', ');
+        const captainName = t.profiles?.cod_username || '-';
+
+        return [
+          index + 1,
+          t.name,
+          captainName,
+          playersStr,
+          t.points,
+          `${t.wins} / ${t.losses}`
+        ];
+      });
 
       autoTable(doc, {
         startY: currentY + 5,
-        head: [['Rang', 'Nom', 'Tag', 'Points', 'Matchs Joués', 'Victoires', 'Défaites']],
+        head: [['Rang', 'Nom (Tag)', 'Capitaine', 'Joueurs', 'Points', 'V / D']],
         body: teamBody,
         theme: 'grid',
         headStyles: { fillColor: [40, 40, 40] }
@@ -80,35 +87,71 @@ export async function exportTournamentDataToPDF() {
       .select('*')
       .order('scheduled_at', { ascending: true });
 
-    if (matches && matches.length > 0) {
+    const { data: ffaData } = await supabase.from('schedule_config').select('config').eq('type', 'ffa').single();
+    
+    let allMatches: any[] = [];
+    if (matches) allMatches = [...matches];
+
+    if (ffaData && ffaData.config && ffaData.config.lobbies) {
+      ffaData.config.lobbies.forEach((r: any) => {
+        r.lobbies.forEach((l: any) => {
+          allMatches.push({
+            format: 'ffa',
+            round_name: `Partie ${r.round}`,
+            team1_name: `Lobby: ${l.name}`,
+            team2_name: `${l.players?.length || 0} Joueurs`,
+            status: l.status || 'scheduled',
+            team1_score: null,
+            team2_score: null,
+            scheduled_at: l.scheduled_at
+          });
+        });
+      });
+    }
+
+    // Sort all by date
+    allMatches.sort((a, b) => {
+      const timeA = a.scheduled_at ? new Date(a.scheduled_at).getTime() : Infinity;
+      const timeB = b.scheduled_at ? new Date(b.scheduled_at).getTime() : Infinity;
+      return timeA - timeB;
+    });
+
+    if (allMatches.length > 0) {
       if (currentY > 150) {
         doc.addPage();
         currentY = 20;
       }
       
       doc.setFontSize(14);
-      doc.text('Matchs 4v4 et 1v1', 14, currentY);
+      doc.text('Historique des Matchs (4v4, 1v1, FFA)', 14, currentY);
       
-      const matchBody = matches.map((m: any) => {
+      const matchBody = allMatches.map((m: any) => {
         let dateStr = 'À confirmer';
         if (m.scheduled_at) {
           dateStr = new Date(m.scheduled_at).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
         }
         
+        let scoreStr = '-';
+        if (m.format === 'ffa') {
+           scoreStr = '-'; // FFA no score
+        } else {
+           scoreStr = `${m.team1_score ?? '-'} / ${m.team2_score ?? '-'}`;
+        }
+
         return [
-          m.format,
+          m.format.toUpperCase(),
           m.round_name || '-',
           m.team1_name || 'TBD',
           m.team2_name || 'TBD',
           m.status,
-          `${m.team1_score ?? '-'} / ${m.team2_score ?? '-'}`,
+          scoreStr,
           dateStr
         ];
       });
 
       autoTable(doc, {
         startY: currentY + 5,
-        head: [['Format', 'Tour', 'Equipe 1', 'Equipe 2', 'Statut', 'Score', 'Date']],
+        head: [['Format', 'Tour', 'Equipe 1 / Lobby', 'Equipe 2 / Infos', 'Statut', 'Score', 'Date']],
         body: matchBody,
         theme: 'grid',
         headStyles: { fillColor: [40, 40, 40] }
