@@ -157,7 +157,14 @@ export default function AdminPlayerDetailPage({ playerId, onNavigate }: Props) {
         </div>
         <div>
           <p className="section-title">PROFIL JOUEUR</p>
-          <h1 className="font-barlow font-black text-3xl text-white uppercase">{player.cod_username}</h1>
+          <h1 className="font-barlow font-black text-3xl text-white uppercase flex items-center gap-3">
+            {player.cod_username}
+            {player.matricule && (
+              <span className="text-sm font-normal text-ghost-gold/80 bg-ghost-gold/10 px-2 py-1 rounded">
+                {player.matricule}
+              </span>
+            )}
+          </h1>
         </div>
       </div>
 

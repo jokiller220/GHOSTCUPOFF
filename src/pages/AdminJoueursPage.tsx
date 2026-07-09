@@ -312,7 +312,10 @@ export default function AdminJoueursPage({ onNavigate }: AdminJoueursPageProps) 
               </div>
               <div className="flex-1">
                 <p className="font-barlow font-bold text-white text-sm">{p.cod_username}</p>
-                <p className="text-ghost-gray text-xs">{p.real_name}</p>
+                <div className="flex gap-2 items-center">
+                  <p className="text-ghost-gray text-xs">{p.real_name}</p>
+                  {p.matricule && <span className="text-ghost-gold/80 text-[10px] bg-ghost-gold/10 px-1 py-0.5 rounded">{p.matricule}</span>}
+                </div>
               </div>
               <span className={`text-[9px] font-barlow font-bold uppercase border px-2 py-0.5 ${p.role === 'admin' ? 'text-ghost-red border-ghost-red/40' : 'text-ghost-gray border-ghost-border'}`}>
                 {p.role}

@@ -137,11 +137,16 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
     <div className="animate-slide-up">
       {/* Welcome */}
       <div className="flex items-start justify-between mb-6 md:mb-8 flex-wrap gap-3">
-        <div>
-          <p className="text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-1">Tableau de bord</p>
-          <h1 className="font-barlow font-black text-xl md:text-3xl text-white uppercase">
-            BIENVENUE, <span className="text-ghost-gold">{profile?.cod_username?.toUpperCase()}</span>
-          </h1>
+          <div>
+            <p className="text-ghost-gray text-xs font-barlow uppercase tracking-widest mb-1">Tableau de bord</p>
+            <h1 className="font-barlow font-black text-xl md:text-3xl text-white uppercase flex flex-col sm:flex-row sm:items-end gap-2">
+              <span>BIENVENUE, <span className="text-ghost-gold">{profile?.cod_username?.toUpperCase()}</span></span>
+              {profile?.matricule && (
+                <span className="text-xs text-ghost-gray font-normal tracking-widest sm:mb-1">
+                  Matricule: {profile.matricule}
+                </span>
+              )}
+            </h1>
           <div className={`inline-flex items-center gap-2 mt-3 px-3 py-1 text-xs font-barlow font-bold uppercase tracking-wider ${getStatus().color}`}>
             {getStatus().live && <span className="w-1.5 h-1.5 rounded-full bg-ghost-green live-indicator" />}
             {getStatus().label}

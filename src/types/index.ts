@@ -16,6 +16,7 @@ export interface Profile {
   real_name: string;
   role: 'player' | 'admin';
   avatar_url?: string;
+  matricule?: string;
   created_at: string;
 }
 
