@@ -57,7 +57,13 @@ export default function AdminPlanningPage() {
       setRrDates(loadedRrDates);
       
       const bracket = data.find(c => c.type === 'bracket');
-      if (bracket) setBracketDates(bracket.config.dates || []);
+      let loadedBracketDates = bracket?.config?.dates || [];
+      if (loadedBracketDates.length < 4) {
+        const padded = [...loadedBracketDates];
+        while (padded.length < 4) padded.push({ date: '', times: [] });
+        loadedBracketDates = padded;
+      }
+      setBracketDates(loadedBracketDates);
     }
     setLoading(false);
     setIsEditing(false);
@@ -230,43 +236,41 @@ export default function AdminPlanningPage() {
             
             <div className="space-y-4">
               {['1/8 de finale', '1/4 de finale', '1/2 de finale', 'Finale'].map((label, i) => (
-                <div key={`bracket-${i}`} className="flex items-center gap-3 flex-wrap">
-                  <span className="font-barlow font-bold text-ghost-gray text-xs w-24">{label}</span>
-                  {bracketDates[i] && (
-                    <>
+                  <div key={`bracket-${i}`} className="flex items-center gap-3 flex-wrap">
+                    <span className="font-barlow font-bold text-ghost-gray text-xs w-24">{label}</span>
+                    <input 
+                      type="date" 
+                      value={bracketDates[i]?.date || ''} 
+                      onChange={e => {
+                        const newDates = [...bracketDates];
+                        if (!newDates[i]) newDates[i] = { date: '', times: [] };
+                        newDates[i].date = e.target.value;
+                        setBracketDates(newDates);
+                      }}
+                      disabled={!isEditing}
+                      className="input-dark disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    <div className="flex-1 flex flex-col gap-1">
                       <input 
-                        type="date" 
-                        value={bracketDates[i].date} 
+                        type="text" 
+                        value={bracketDates[i]?.times?.join(', ') || ''} 
                         onChange={e => {
                           const newDates = [...bracketDates];
-                          newDates[i].date = e.target.value;
+                          if (!newDates[i]) newDates[i] = { date: '', times: [] };
+                          newDates[i].times = e.target.value.split(',').map(t => t.trim());
                           setBracketDates(newDates);
                         }}
+                        placeholder="Ex: 18:00, 19:30"
                         disabled={!isEditing}
-                        className="input-dark disabled:opacity-50 disabled:cursor-not-allowed" 
+                        className="input-dark w-full disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px]" 
                       />
-                      <div className="flex-1 flex flex-col gap-1">
-                        <input 
-                          type="text" 
-                          value={bracketDates[i].times.join(', ')} 
-                          onChange={e => {
-                            const newDates = [...bracketDates];
-                            newDates[i].times = e.target.value.split(',').map(t => t.trim());
-                            setBracketDates(newDates);
-                          }}
-                          placeholder="Ex: 18:00, 19:30"
-                          disabled={!isEditing}
-                          className="input-dark w-full disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px]" 
-                        />
-                        {getBracketHelperText(bracketDates[i].date, bracketDates[i].times) && (
-                          <span className="text-[10px] text-ghost-gray font-barlow italic">
-                            {getBracketHelperText(bracketDates[i].date, bracketDates[i].times)}
-                          </span>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
+                      {bracketDates[i] && getBracketHelperText(bracketDates[i].date, bracketDates[i].times) && (
+                        <span className="text-[10px] text-ghost-gray font-barlow italic">
+                          {getBracketHelperText(bracketDates[i].date, bracketDates[i].times)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
               ))}
             </div>
           </div>
