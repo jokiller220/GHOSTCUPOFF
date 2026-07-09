@@ -91,9 +91,11 @@ export function AdminSettingsModal({ onClose }: AdminSettingsModalProps) {
       await supabase.from('matches').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       await supabase.from('tournament_entries').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       
-      // Note: We intentionally do NOT delete teams and team_members so players don't have to recreate them.
+      // 3. Delete teams and team_members
+      await supabase.from('team_members').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('teams').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       
-      // 3. Reset schedule config
+      // 4. Reset schedule config
       await supabase.from('schedule_config').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
       // Log action
