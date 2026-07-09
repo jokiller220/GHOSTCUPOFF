@@ -231,7 +231,7 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
     // but we need it immediately. Let's just compute from editScores directly to be safe and instant.
     let t1W = 0;
     let t2W = 0;
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 3; i++) {
       const t1 = parseInt(editScores[i]?.t1) || 0;
       const t2 = parseInt(editScores[i]?.t2) || 0;
       if (t1 > t2) t1W++;
@@ -412,7 +412,7 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
                   </tr>
                 </thead>
                 <tbody>
-                  {[1, 2, 3, 4, 5].map(i => {
+                  {[1, 2, 3].map(i => {
                     const ev = editScores[i] ?? { t1: '', t2: '' };
                     return (
                       <tr key={i} className="border-b border-ghost-border/30">
