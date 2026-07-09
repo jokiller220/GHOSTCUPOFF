@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Users, Users2, Swords, Clock, ChevronRight, RefreshCw, CheckCircle, AlertCircle, UserPlus, Calendar, Settings } from 'lucide-react';
+import { Users, Users2, Swords, Clock, ChevronRight, RefreshCw, CheckCircle, AlertCircle, UserPlus, Calendar, Settings, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Match, ActivityLog, Page, ScoreProof } from '../types';
 import { AdminSettingsModal } from '../components/AdminSettingsModal';
+import { exportTournamentDataToPDF } from '../utils/exportPdf';
 
 interface AdminDashboardProps {
   onNavigate: (page: Page, data?: unknown) => void;
@@ -46,6 +47,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     load();
@@ -147,6 +149,18 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <h1 className="font-barlow font-black text-2xl md:text-3xl text-white uppercase">TABLEAU DE BORD</h1>
         </div>
         <div className="flex gap-2">
+          <button 
+            onClick={async () => {
+              setExporting(true);
+              await exportTournamentDataToPDF();
+              setExporting(false);
+            }}
+            disabled={exporting}
+            className="btn-gold text-xs py-2 px-4 flex items-center gap-2"
+          >
+            {exporting ? <RefreshCw size={12} className="animate-spin" /> : <Download size={12} />} 
+            {exporting ? 'EXPORT...' : 'EXPORTER PDF'}
+          </button>
           <button onClick={() => setShowSettings(true)} className="btn-outline text-xs py-2 px-4 flex items-center gap-2">
             <Settings size={12} /> PARAMÈTRES
           </button>
