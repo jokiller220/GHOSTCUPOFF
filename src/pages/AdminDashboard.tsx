@@ -112,7 +112,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
       const { data: proofs, error: errProofs } = await supabase
         .from('score_proofs')
-        .select('*')
+        .select('*, matches(round_name, format), profiles(cod_username)')
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
         .limit(6);
@@ -281,10 +281,10 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             pendingProofs.map(proof => (
               <div key={proof.id} className="card p-4 bg-slate-950/50 border border-slate-800">
                 <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm text-white font-semibold">Match ID: {proof.match_id}</p>
-                    <p className="text-ghost-gray text-xs">Soumis par : {proof.submitted_by}</p>
-                  </div>
+                    <div>
+                      <p className="text-sm text-white font-semibold">Match: {(proof as any).matches?.round_name || proof.match_id}</p>
+                      <p className="text-ghost-gray text-xs">Soumis par : {(proof as any).profiles?.cod_username || proof.submitted_by}</p>
+                    </div>
                   <span className="text-ghost-gold text-[11px] uppercase tracking-widest">{proof.status}</span>
                 </div>
                 <div className="mt-3 flex flex-col gap-1">
