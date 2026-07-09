@@ -39,9 +39,12 @@ import AdminBracketsPage from './pages/AdminBracketsPage';
 import AdminPlanningPage from './pages/AdminPlanningPage';
 import AdminFFAPage from './pages/AdminFFAPage';
 import AdminPlayerDetailPage from './pages/AdminPlayerDetailPage';
+import AdminEquipesPage from './pages/AdminEquipesPage';
+import PreuveLobbyPage from './pages/PreuveLobbyPage';
+import AdminLobbyPage from './pages/AdminLobbyPage';
 
-const PLAYER_PAGES: Page[] = ['dashboard', 'mes-matchs', 'mon-equipe', 'notifications', 'parametres', 'match-detail', 'preuve-score'];
-const ADMIN_PAGES: Page[] = ['admin', 'admin-matchs', 'admin-joueurs', 'admin-brackets', 'admin-annonces', 'admin-match-detail', 'admin-planning', 'admin-ffa', 'admin-player-detail'];
+const PLAYER_PAGES: Page[] = ['dashboard', 'mes-matchs', 'mon-equipe', 'notifications', 'parametres', 'match-detail', 'preuve-score', 'preuve-lobby'];
+const ADMIN_PAGES: Page[] = ['admin', 'admin-matchs', 'admin-joueurs', 'admin-brackets', 'admin-annonces', 'admin-match-detail', 'admin-planning', 'admin-ffa', 'admin-player-detail', 'admin-equipes', 'admin-lobby'];
 
 function AppContent() {
   const { profile, loading } = useAuth();
@@ -158,6 +161,8 @@ function AppContent() {
         {currentPage === 'admin-brackets' && <AdminBracketsPage onNavigate={navigate} />}
         {currentPage === 'admin-planning' && <AdminPlanningPage />}
         {currentPage === 'admin-ffa' && <AdminFFAPage />}
+        {currentPage === 'admin-equipes' && <AdminEquipesPage onNavigate={navigate} />}
+        {currentPage === 'admin-lobby' && <AdminLobbyPage onNavigate={navigate} />}
       </AdminLayout>
     );
   }
@@ -181,6 +186,9 @@ function AppContent() {
         )}
         {currentPage === 'preuve-score' && (
           <PreuveScorePage matchId={pageData as string} onNavigate={navigate} />
+        )}
+        {currentPage === 'preuve-lobby' && (
+          <PreuveLobbyPage onNavigate={navigate} />
         )}
       </DashboardLayout>
     );

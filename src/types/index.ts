@@ -149,6 +149,7 @@ export type Page =
   | 'parametres'
   | 'match-detail'
   | 'preuve-score'
+  | 'preuve-lobby'
   | 'admin'
   | 'admin-matchs'
   | 'admin-joueurs'
@@ -156,7 +157,11 @@ export type Page =
   | 'admin-match-detail'
   | 'admin-planning'
   | 'admin-ffa'
-  | 'admin-player-detail';
+  | 'admin-player-detail'
+  | 'admin-equipes'
+  | 'admin-lobby'
+  | 'profile'
+  | 'tournoi-inscription';
 
 export interface ScheduleConfig {
   id: string;

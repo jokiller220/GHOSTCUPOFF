@@ -259,13 +259,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       {/* Quick actions */}
       <div className="mt-6 md:mt-8">
         <p className="section-title mb-4">ACTIONS RAPIDES</p>
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3">
           {[
             { label: 'Gérer les matchs', page: 'admin-matchs' as Page, color: 'btn-gold' },
             { label: 'Joueurs & Équipes', page: 'admin-joueurs' as Page, color: 'btn-dark' },
             { label: 'Brackets', page: 'admin-brackets' as Page, color: 'btn-dark' },
             { label: 'Annonces', page: 'admin-annonces' as Page, color: 'btn-dark' },
             { label: 'Horaires', page: 'admin-planning' as Page, color: 'btn-outline' },
+            { label: 'Litiges Lobbys', page: 'admin-lobby' as Page, color: 'btn-outline border-red-500/50 text-red-500 hover:bg-red-500 hover:text-black' },
           ].map(({ label, page, color }) => (
             <button key={page} onClick={() => onNavigate(page)} className={`${color} text-xs py-3 w-full`}>
               {label}
