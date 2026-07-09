@@ -12,7 +12,6 @@ export default function AdminPlanningPage() {
   const [message, setMessage] = useState('');
 
   const [rrDates, setRrDates] = useState<{ date: string; time: string }[]>([]);
-  const [ffaDates, setFfaDates] = useState<{ date: string; time: string }[]>([]);
   const [bracketDates, setBracketDates] = useState<{ date: string; times: string[] }[]>([]);
 
   function getHelperText(date: string, time: string) {
@@ -57,15 +56,6 @@ export default function AdminPlanningPage() {
       }
       setRrDates(loadedRrDates);
       
-      const ffa = data.find(c => c.type === 'ffa');
-      let loadedFfaDates = ffa?.config?.dates || [];
-      if (loadedFfaDates.length < 4) {
-        const padded = [...loadedFfaDates];
-        while (padded.length < 4) padded.push({ date: '', time: '' });
-        loadedFfaDates = padded;
-      }
-      setFfaDates(loadedFfaDates);
-
       const bracket = data.find(c => c.type === 'bracket');
       if (bracket) setBracketDates(bracket.config.dates || []);
     }
@@ -79,16 +69,13 @@ export default function AdminPlanningPage() {
     
     // Check if dates are well formed
     const existingRr = configs.find(c => c.type === 'round_robin')?.config || {};
-    const existingFfa = configs.find(c => c.type === 'ffa')?.config || {};
     const existingBracket = configs.find(c => c.type === 'bracket')?.config || {};
 
     const rrConfig = { ...existingRr, dates: rrDates };
-    const ffaConfig = { ...existingFfa, dates: ffaDates };
     const bracketConfig = { ...existingBracket, dates: bracketDates };
 
     await supabase.from('schedule_config').upsert([
       { type: 'round_robin', config: rrConfig },
-      { type: 'ffa', config: ffaConfig },
       { type: 'bracket', config: bracketConfig }
     ], { onConflict: 'type' });
 
@@ -218,51 +205,6 @@ export default function AdminPlanningPage() {
                         const newDates = [...rrDates];
                         newDates[i].time = e.target.value;
                         setRrDates(newDates);
-                      }}
-                      disabled={!isEditing}
-                      className="input-dark w-full disabled:opacity-50 disabled:cursor-not-allowed" 
-                    />
-                    {getHelperText(item.date, item.time) && (
-                      <span className="text-[10px] text-ghost-gray font-barlow italic">
-                        {getHelperText(item.date, item.time)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* FFA */}
-          <div className="card p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Clock size={18} className="text-ghost-gold" />
-              <h2 className="font-barlow font-black text-xl text-white uppercase tracking-wider">Mêlée Générale (FFA)</h2>
-            </div>
-            <p className="text-ghost-gray text-xs mb-4">Horaires des 4 parties FFA.</p>
-            <div className="space-y-3">
-              {ffaDates.map((item, i) => (
-                <div key={`ffa-${i}`} className="flex items-center gap-3">
-                  <span className="font-barlow font-bold text-ghost-gray text-xs w-16">Partie {i+1}</span>
-                  <input 
-                    type="date" 
-                    value={item.date} 
-                    onChange={e => {
-                      const newDates = [...ffaDates];
-                      newDates[i].date = e.target.value;
-                      setFfaDates(newDates);
-                    }}
-                    disabled={!isEditing}
-                    className="input-dark flex-1 disabled:opacity-50 disabled:cursor-not-allowed" 
-                  />
-                  <div className="flex-1 flex flex-col gap-1">
-                    <input 
-                      type="time" 
-                      value={item.time} 
-                      onChange={e => {
-                        const newDates = [...ffaDates];
-                        newDates[i].time = e.target.value;
-                        setFfaDates(newDates);
                       }}
                       disabled={!isEditing}
                       className="input-dark w-full disabled:opacity-50 disabled:cursor-not-allowed" 

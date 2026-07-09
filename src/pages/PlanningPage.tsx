@@ -25,19 +25,59 @@ function formatDate(dateStr: string | null | undefined) {
 }
 
 export default function PlanningPage({ onNavigate }: PlanningPageProps) {
-  const [filter, setFilter] = useState<'all' | '4v4' | '1v1'>('all');
+  const [filter, setFilter] = useState<'all' | '4v4' | '1v1' | 'ffa'>('all');
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function fetchMatches() {
     setLoading(true);
-    let q = supabase
-      .from('matches')
-      .select('*')
-      .order('scheduled_at', { ascending: true });
-    if (filter !== 'all') q = q.eq('format', filter);
-    const { data } = await q;
-    setMatches((data as Match[]) ?? []);
+    let allMatches: Match[] = [];
+
+    // Fetch DB matches
+    if (filter !== 'ffa') {
+      let q = supabase
+        .from('matches')
+        .select('*');
+      if (filter !== 'all') q = q.eq('format', filter);
+      const { data } = await q;
+      if (data) allMatches = [...allMatches, ...(data as Match[])];
+    }
+
+    // Fetch FFA lobbies
+    if (filter === 'all' || filter === 'ffa') {
+      const { data: ffaData } = await supabase.from('schedule_config').select('config').eq('type', 'ffa').single();
+      if (ffaData && ffaData.config && ffaData.config.lobbies) {
+        ffaData.config.lobbies.forEach((r: any) => {
+          r.lobbies.forEach((l: any) => {
+            if (l.scheduled_at) {
+              const ffaMatch: Match = {
+                id: `ffa-${l.name}`,
+                format: 'ffa',
+                round_name: `Partie ${r.round}`,
+                team1_name: 'Mêlée Générale',
+                team2_name: `${l.players?.length || 0} Joueurs`,
+                scheduled_at: l.scheduled_at,
+                status: l.status || 'scheduled',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                team1_id: '',
+                team2_id: ''
+              };
+              allMatches.push(ffaMatch);
+            }
+          });
+        });
+      }
+    }
+
+    // Sort all by date
+    allMatches.sort((a, b) => {
+      const timeA = a.scheduled_at ? new Date(a.scheduled_at).getTime() : Infinity;
+      const timeB = b.scheduled_at ? new Date(b.scheduled_at).getTime() : Infinity;
+      return timeA - timeB;
+    });
+
+    setMatches(allMatches);
     setLoading(false);
   }
 
@@ -71,6 +111,7 @@ export default function PlanningPage({ onNavigate }: PlanningPageProps) {
           { key: 'all', label: 'TOUS' },
           { key: '4v4', label: '4 VS 4' },
           { key: '1v1', label: '1 VS 1' },
+          { key: 'ffa', label: 'FFA (Mêlée)' },
         ].map(({ key, label }) => (
           <button
             key={key}
@@ -113,11 +154,14 @@ export default function PlanningPage({ onNavigate }: PlanningPageProps) {
                   const { time } = formatDate(match.scheduled_at);
                   const statusInfo = STATUS_LABELS[match.status] || STATUS_LABELS.scheduled;
                   return (
-                    <div
-                      key={match.id}
-                      className="card hover:border-ghost-gold/30 transition-all duration-200 cursor-pointer group"
-                      onClick={() => onNavigate('match-detail', match.id)}
-                    >
+                      <div
+                        key={match.id}
+                        className="card hover:border-ghost-gold/30 transition-all duration-200 cursor-pointer group"
+                        onClick={() => {
+                          if (match.format === 'ffa') onNavigate('brackets');
+                          else onNavigate('match-detail', match.id);
+                        }}
+                      >
                       <div className="flex items-center gap-4 px-5 py-4 flex-wrap">
                         {/* Time */}
                         <div className="flex items-center gap-1.5 w-16 shrink-0">
