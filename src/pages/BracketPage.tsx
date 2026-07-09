@@ -24,6 +24,7 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
   const [activeTab, setActiveTab] = useState<'classement' | 'bracket' | 'solo'>('classement');
   const [matches, setMatches] = useState<Match[]>([]);
   const [soloLobbyRounds, setSoloLobbyRounds] = useState<any[]>([]);
+  const [ffaDates, setFfaDates] = useState<{ date: string; time: string }[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [champion, setChampion] = useState<string | null>(null);
@@ -66,6 +67,7 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
     setLoading(true);
     const { data } = await supabase.from('schedule_config').select('config').eq('type', 'ffa').single();
     setSoloLobbyRounds(data?.config?.lobbies || []);
+    setFfaDates(data?.config?.dates || []);
     setLoading(false);
   }
 
@@ -287,29 +289,41 @@ export default function BracketPage({ onNavigate }: BracketPageProps) {
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {soloLobbyRounds.map((round: any) => (
-                <div key={round.round} className="card p-4 md:p-5 border-ghost-border/50">
-                  <p className="font-barlow font-black text-ghost-gold uppercase text-sm md:text-base tracking-[0.2em] mb-4">
-                    Partie {round.round}
-                  </p>
-                  <div className="space-y-3">
-                    {round.lobbies.map((lobby: any) => (
-                      <div key={lobby.name} className="rounded-2xl border border-ghost-border/30 bg-black/30 p-4 hover:border-ghost-border/50 transition-colors">
-                        <p className="font-barlow font-bold text-white text-[11px] uppercase tracking-wider mb-3">
-                          {lobby.name}
-                        </p>
-                        <div className="grid grid-cols-2 gap-2 text-ghost-gray-light text-xs font-barlow">
-                          {lobby.players.map((player: any) => (
-                            <div key={player.id} className="rounded-lg bg-ghost-dark/80 px-3 py-2 truncate border border-ghost-border/20">
-                              {player.name}
-                            </div>
-                          ))}
+              {soloLobbyRounds.map((round: any) => {
+                const schedule = ffaDates[round.round - 1];
+                const scheduleText = schedule && schedule.date ? 
+                  `${new Date(schedule.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })} à ${schedule.time || '--:--'}` : 
+                  'Date à confirmer';
+
+                return (
+                  <div key={round.round} className="card p-4 md:p-5 border-ghost-border/50">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="font-barlow font-black text-ghost-gold uppercase text-sm md:text-base tracking-[0.2em]">
+                        Partie {round.round}
+                      </p>
+                      <span className="font-barlow text-[10px] uppercase tracking-wider text-ghost-gray border border-ghost-border/30 px-2 py-1 rounded">
+                        {scheduleText}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      {round.lobbies.map((lobby: any) => (
+                        <div key={lobby.name} className="rounded-2xl border border-ghost-border/30 bg-black/30 p-4 hover:border-ghost-border/50 transition-colors">
+                          <p className="font-barlow font-bold text-white text-[11px] uppercase tracking-wider mb-3">
+                            {lobby.name}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 text-ghost-gray-light text-xs font-barlow">
+                            {lobby.players.map((player: any) => (
+                              <div key={player.id} className="rounded-lg bg-ghost-dark/80 px-3 py-2 truncate border border-ghost-border/20">
+                                {player.name}
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

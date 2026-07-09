@@ -58,7 +58,13 @@ export default function AdminPlanningPage() {
       setRrDates(loadedRrDates);
       
       const ffa = data.find(c => c.type === 'ffa');
-      if (ffa) setFfaDates(ffa.config.dates || []);
+      let loadedFfaDates = ffa?.config?.dates || [];
+      if (loadedFfaDates.length < 4) {
+        const padded = [...loadedFfaDates];
+        while (padded.length < 4) padded.push({ date: '', time: '' });
+        loadedFfaDates = padded;
+      }
+      setFfaDates(loadedFfaDates);
 
       const bracket = data.find(c => c.type === 'bracket');
       if (bracket) setBracketDates(bracket.config.dates || []);
