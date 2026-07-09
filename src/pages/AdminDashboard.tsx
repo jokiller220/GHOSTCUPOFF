@@ -287,12 +287,13 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                     </div>
                   <span className="text-ghost-gold text-[11px] uppercase tracking-widest">{proof.status}</span>
                 </div>
-                <div className="mt-3 flex flex-col gap-1">
-                  {proof.file_url.split(',').map((url, i) => (
-                    <a key={i} href={url} target="_blank" rel="noreferrer" className="block text-ghost-gold text-xs underline hover:text-white transition-colors">
-                      Voir la preuve {proof.file_url.includes(',') ? `#${i+1}` : ''}
-                    </a>
-                  ))}
+                <div className="mt-3 flex flex-col gap-2">
+                  <button
+                    onClick={() => onNavigate('admin-match-detail' as any, proof.match_id)}
+                    className="btn-outline text-[10px] py-1.5 px-3 w-full border-ghost-gold/50 text-ghost-gold hover:bg-ghost-gold hover:text-black transition-colors"
+                  >
+                    VOIR LE MATCH ET LES PREUVES
+                  </button>
                 </div>
               </div>
             ))
