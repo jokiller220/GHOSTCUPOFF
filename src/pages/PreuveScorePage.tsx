@@ -15,8 +15,6 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
   const [rounds, setRounds] = useState<{t1: string, t2: string}[]>([
     { t1: '', t2: '' },
     { t1: '', t2: '' },
-    { t1: '', t2: '' },
-    { t1: '', t2: '' },
     { t1: '', t2: '' }
   ]);
   const [files, setFiles] = useState<File[]>([]);
