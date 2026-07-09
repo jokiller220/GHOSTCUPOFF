@@ -116,6 +116,11 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
     const proofUrlsString = uploadedUrls.join(',');
     const roundDetails = validRounds.map((r, i) => `M${i+1}: ${r.t1}-${r.t2}`).join(', ');
     const fullComment = `[Score: ${finalT1} - ${finalT2}] (${roundDetails}) ${comment ? '- ' + comment : ''}`;
+    const roundsJson = validRounds.map((r, i) => ({
+      manche: i + 1,
+      t1: parseInt(r.t1) || 0,
+      t2: parseInt(r.t2) || 0
+    }));
 
     let rpcError = null;
     try {
@@ -126,7 +131,8 @@ export default function PreuveScorePage({ matchId, onNavigate }: PreuveScorePage
         p_comment: fullComment,
         p_team1_score: finalT1,
         p_team2_score: finalT2,
-        p_team_side: teamSide
+        p_team_side: teamSide,
+        p_rounds: roundsJson
       });
       rpcError = error;
     } catch (e: any) {

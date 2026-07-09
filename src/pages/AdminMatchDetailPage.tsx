@@ -82,7 +82,14 @@ export default function AdminMatchDetailPage({ matchId, onNavigate }: AdminMatch
     // Auto-fill from proof if no scores exist yet
     if ((!sc || sc.length === 0) && prfs && prfs.length > 0) {
       const latestProof = prfs[0];
-      if (latestProof.comment) {
+      if (latestProof.rounds && Array.isArray(latestProof.rounds)) {
+        latestProof.rounds.forEach((r: any) => {
+          if (r.manche >= 1 && r.manche <= 3) {
+            init[r.manche] = { t1: r.t1?.toString() || '', t2: r.t2?.toString() || '' };
+          }
+        });
+      } else if (latestProof.comment) {
+        // Fallback to parsing comment for older proofs
         const roundsMatch = latestProof.comment.match(/\((M[1-5]:.*?)\)/);
         if (roundsMatch) {
           const roundsStr = roundsMatch[1];
