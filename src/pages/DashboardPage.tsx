@@ -307,6 +307,7 @@ export default function DashboardPage({ onNavigate }: DashboardPageProps) {
                 { label: 'Mon équipe', page: 'mon-equipe' as Page },
                 { label: 'Classement général', page: 'bracket' as Page },
                 { label: 'Soumettre une preuve', page: 'mes-matchs' as Page },
+                { label: 'Soumettre un rang (FFA)', page: 'preuve-lobby' as Page },
                 { label: 'Planning des matchs', page: 'planning' as Page },
               ].map(({ label, page }) => (
                 <button
